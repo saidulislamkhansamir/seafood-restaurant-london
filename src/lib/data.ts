@@ -1,6 +1,6 @@
 import { supabase } from "./supabase";
 import type { Tables } from "./database.types";
-import { slugify } from "./utils";
+import { slugify, primaryAreaName } from "./utils";
 
 export type Restaurant = Tables<"restaurants">;
 
@@ -101,6 +101,87 @@ export async function getRestaurantsByBoroughSlug(boroughSlug: string): Promise<
   if (!match) return { borough: null, restaurants: [] };
   const restaurants = await getAllRestaurants({ borough: match.name });
   return { borough: match.name, restaurants };
+}
+
+export async function getRestaurantsByBoroughAndCategorySlug(
+  boroughSlug: string,
+  categorySlug: string
+): Promise<{ borough: string | null; category: string | null; restaurants: Restaurant[] }> {
+  const [boroughs, categories] = await Promise.all([getBoroughs(), getCategories()]);
+  const borough = boroughs.find((b) => b.slug === boroughSlug);
+  const category = categories.find((c) => c.slug === categorySlug);
+  if (!borough || !category) return { borough: null, category: null, restaurants: [] };
+  const restaurants = await getAllRestaurants({ borough: borough.name, category: category.name });
+  return { borough: borough.name, category: category.name, restaurants };
+}
+
+export type Area = { name: string; slug: string; borough: string; boroughSlug: string; count: number };
+
+export async function getAreas(): Promise<Area[]> {
+  const { data } = await supabase
+    .from("restaurants")
+    .select("location_area, borough")
+    .eq("listing_status", ACTIVE);
+
+  const counts = new Map<string, Area>();
+  for (const row of data ?? []) {
+    if (!row.location_area || !row.borough) continue;
+    const name = primaryAreaName(row.location_area);
+    const boroughSlug = slugify(row.borough);
+    const slug = slugify(name);
+    if (slug === boroughSlug) continue; // skip areas that just duplicate the borough itself
+    const key = `${boroughSlug}/${slug}`;
+    const existing = counts.get(key);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      counts.set(key, { name, slug, borough: row.borough, boroughSlug, count: 1 });
+    }
+  }
+  return Array.from(counts.values()).sort((a, b) => b.count - a.count);
+}
+
+export async function getRestaurantsByBoroughAndAreaSlug(
+  boroughSlug: string,
+  areaSlug: string
+): Promise<{ borough: string | null; area: string | null; restaurants: Restaurant[] }> {
+  const areas = await getAreas();
+  const match = areas.find((a) => a.boroughSlug === boroughSlug && a.slug === areaSlug);
+  if (!match) return { borough: null, area: null, restaurants: [] };
+  const boroughRestaurants = await getAllRestaurants({ borough: match.borough });
+  const restaurants = boroughRestaurants.filter(
+    (r) => r.location_area && slugify(primaryAreaName(r.location_area)) === areaSlug
+  );
+  return { borough: match.borough, area: match.name, restaurants };
+}
+
+export async function getFeatures(): Promise<{ name: string; slug: string; count: number }[]> {
+  const { data } = await supabase.from("restaurants").select("attributes").eq("listing_status", ACTIVE);
+  const counts = new Map<string, number>();
+  for (const row of data ?? []) {
+    for (const attr of row.attributes ?? []) {
+      counts.set(attr, (counts.get(attr) ?? 0) + 1);
+    }
+  }
+  return Array.from(counts.entries())
+    .map(([name, count]) => ({ name, slug: slugify(name), count }))
+    .sort((a, b) => b.count - a.count);
+}
+
+export async function getRestaurantsByFeatureSlug(featureSlug: string): Promise<{
+  feature: string | null;
+  restaurants: Restaurant[];
+}> {
+  const features = await getFeatures();
+  const match = features.find((f) => f.slug === featureSlug);
+  if (!match) return { feature: null, restaurants: [] };
+  const { data } = await supabase
+    .from("restaurants")
+    .select("*")
+    .eq("listing_status", ACTIVE)
+    .contains("attributes", [match.name])
+    .order("rating", { ascending: false });
+  return { feature: match.name, restaurants: data ?? [] };
 }
 
 export async function submitRestaurant(input: {

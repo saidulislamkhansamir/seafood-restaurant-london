@@ -87,7 +87,7 @@ export default async function HomePage() {
               {boroughs.map((b) => (
                 <Link
                   key={b.slug}
-                  href={`/borough/${b.slug}`}
+                  href={`/${b.slug}`}
                   className="rounded-full border border-border bg-white px-4 py-2 text-sm hover:border-primary hover:text-primary transition"
                 >
                   {b.name} <span className="text-foreground/50">({b.count})</span>

@@ -49,7 +49,7 @@ export default async function RestaurantsPage({
         {boroughs.map((b) => (
           <Link
             key={b.slug}
-            href={`/borough/${b.slug}`}
+            href={`/${b.slug}`}
             className="rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-foreground/70 hover:text-primary transition"
           >
             {b.name}

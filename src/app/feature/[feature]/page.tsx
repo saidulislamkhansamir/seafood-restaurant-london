@@ -2,30 +2,30 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/Container";
 import { RestaurantCard } from "@/components/RestaurantCard";
-import { getRestaurantsByBoroughSlug } from "@/lib/data";
+import { getRestaurantsByFeatureSlug } from "@/lib/data";
 
 export const revalidate = 3600;
 
-type Props = { params: Promise<{ borough: string }> };
+type Props = { params: Promise<{ feature: string }> };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { borough } = await params;
-  const { borough: name } = await getRestaurantsByBoroughSlug(borough);
+  const { feature } = await params;
+  const { feature: name } = await getRestaurantsByFeatureSlug(feature);
   if (!name) return {};
   return {
-    title: `Restaurants in ${name}`,
-    description: `Seafood, fish & chips and takeaway restaurants in ${name}, London — ratings, hours and booking links.`,
+    title: `${name} Restaurants in London`,
+    description: `London restaurants offering ${name.toLowerCase()} — ratings, hours and booking links.`,
   };
 }
 
-export default async function BoroughPage({ params }: Props) {
-  const { borough } = await params;
-  const { borough: name, restaurants } = await getRestaurantsByBoroughSlug(borough);
+export default async function FeaturePage({ params }: Props) {
+  const { feature } = await params;
+  const { feature: name, restaurants } = await getRestaurantsByFeatureSlug(feature);
   if (!name) notFound();
 
   return (
     <Container className="py-12">
-      <h1 className="text-3xl font-bold">Restaurants in {name}</h1>
+      <h1 className="text-3xl font-bold">{name} Restaurants in London</h1>
       <p className="mt-2 text-foreground/60">{restaurants.length} restaurants found</p>
 
       {restaurants.length > 0 ? (
@@ -35,7 +35,7 @@ export default async function BoroughPage({ params }: Props) {
           ))}
         </div>
       ) : (
-        <p className="mt-10 text-foreground/60">No restaurants listed in {name} yet.</p>
+        <p className="mt-10 text-foreground/60">No restaurants found for this feature yet.</p>
       )}
     </Container>
   );

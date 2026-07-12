@@ -81,7 +81,7 @@ export default async function RestaurantPage({ params }: Props) {
           {restaurant.borough ? (
             <>
               {" / "}
-              <Link href={`/borough/${slugify(restaurant.borough)}`} className="hover:text-primary">
+              <Link href={`/${slugify(restaurant.borough)}`} className="hover:text-primary">
                 {restaurant.borough}
               </Link>
             </>

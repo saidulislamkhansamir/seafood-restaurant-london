@@ -4,7 +4,7 @@ import { Container } from "./Container";
 export function Footer() {
   return (
     <footer className="mt-24 border-t border-border bg-muted">
-      <Container className="py-12 grid gap-8 sm:grid-cols-2 md:grid-cols-4">
+      <Container className="py-12 grid gap-8 sm:grid-cols-2 md:grid-cols-5">
         <div>
           <p className="text-lg font-bold text-primary-dark">Seafood Restaurant London</p>
           <p className="mt-2 text-sm text-foreground/70">
@@ -32,6 +32,15 @@ export function Footer() {
           <ul className="space-y-2 text-sm text-foreground/70">
             <li><Link href="/about" className="hover:text-primary">About</Link></li>
             <li><Link href="/contact" className="hover:text-primary">Contact</Link></li>
+            <li><Link href="/advertise" className="hover:text-primary">Advertise</Link></li>
+          </ul>
+        </div>
+        <div>
+          <p className="font-semibold text-sm mb-3">Legal</p>
+          <ul className="space-y-2 text-sm text-foreground/70">
+            <li><Link href="/privacy-policy" className="hover:text-primary">Privacy Policy</Link></li>
+            <li><Link href="/terms" className="hover:text-primary">Terms of Use</Link></li>
+            <li><Link href="/cookies" className="hover:text-primary">Cookies</Link></li>
           </ul>
         </div>
       </Container>
