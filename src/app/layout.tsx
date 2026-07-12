@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { SITE_IS_LIVE } from "@/lib/site-config";
 
 const siteUrl = "https://seafoodrestaurantlondon.co.uk";
 
@@ -18,6 +19,9 @@ export const metadata: Metadata = {
     siteName: "Seafood Restaurant London",
     url: siteUrl,
   },
+  robots: SITE_IS_LIVE
+    ? { index: true, follow: true }
+    : { index: false, follow: false, nocache: true },
 };
 
 export default function RootLayout({
