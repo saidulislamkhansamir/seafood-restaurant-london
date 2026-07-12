@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/Container";
 import { StarRating } from "@/components/StarRating";
+import { MapEmbed } from "@/components/MapEmbed";
 import { categoryIcon, categoryGradient } from "@/lib/category-icon";
 import { getRestaurantBySlug } from "@/lib/data";
 import { slugify } from "@/lib/utils";
@@ -134,6 +135,12 @@ export default async function RestaurantPage({ params }: Props) {
           </div>
 
           <aside className="h-fit rounded-2xl border border-border bg-white p-6">
+            {restaurant.lat && restaurant.lng ? (
+              <div className="mb-6">
+                <MapEmbed lat={restaurant.lat} lng={restaurant.lng} label={restaurant.name} />
+              </div>
+            ) : null}
+
             {links.length > 0 ? (
               <div className="flex flex-col gap-2">
                 {links.map((link) => (
