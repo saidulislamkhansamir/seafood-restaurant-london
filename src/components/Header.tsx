@@ -3,8 +3,8 @@ import { Container } from "./Container";
 
 const NAV = [
   { href: "/restaurants", label: "All Restaurants" },
-  { href: "/category/seafood-restaurant", label: "Seafood" },
-  { href: "/category/fish-and-chips-shop", label: "Fish & Chips" },
+  { href: "/seafood-restaurant", label: "Seafood" },
+  { href: "/fish-and-chips-shop", label: "Fish & Chips" },
   { href: "/blog", label: "Guides" },
 ];
 

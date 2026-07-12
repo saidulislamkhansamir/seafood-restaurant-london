@@ -37,7 +37,7 @@ export default async function RestaurantsPage({
         {categories.map((cat) => (
           <Link
             key={cat.slug}
-            href={`/category/${cat.slug}`}
+            href={`/${cat.slug}`}
             className="rounded-full border border-border bg-white px-3 py-1.5 text-xs font-medium hover:border-primary hover:text-primary transition"
           >
             {cat.name}

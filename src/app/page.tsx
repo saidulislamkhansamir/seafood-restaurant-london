@@ -44,7 +44,7 @@ export default async function HomePage() {
               {categories.map((cat) => (
                 <Link
                   key={cat.slug}
-                  href={`/category/${cat.slug}`}
+                  href={`/${cat.slug}`}
                   className="flex items-center gap-3 rounded-xl border border-border bg-white p-4 hover:border-primary hover:shadow-sm transition"
                 >
                   <span className="text-2xl" aria-hidden>

@@ -11,7 +11,7 @@ import {
 
 export const revalidate = 3600;
 
-type Props = { params: Promise<{ borough: string; slug: string }> };
+type Props = { params: Promise<{ locality: string; slug: string }> };
 
 async function resolve(boroughSlug: string, slug: string) {
   const [boroughs, categories] = await Promise.all([getBoroughs(), getCategories()]);
@@ -33,8 +33,8 @@ async function resolve(boroughSlug: string, slug: string) {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { borough, slug } = await params;
-  const result = await resolve(borough, slug);
+  const { locality, slug } = await params;
+  const result = await resolve(locality, slug);
   if (!result) return {};
   return {
     title: result.label,
@@ -42,9 +42,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function BoroughComboPage({ params }: Props) {
-  const { borough, slug } = await params;
-  const result = await resolve(borough, slug);
+export default async function LocalityComboPage({ params }: Props) {
+  const { locality, slug } = await params;
+  const result = await resolve(locality, slug);
   if (!result) notFound();
 
   return (

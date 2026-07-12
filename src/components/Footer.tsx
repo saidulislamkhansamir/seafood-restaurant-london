@@ -23,8 +23,8 @@ export function Footer() {
         <div>
           <p className="font-semibold text-sm mb-3">Popular Categories</p>
           <ul className="space-y-2 text-sm text-foreground/70">
-            <li><Link href="/category/seafood-restaurant" className="hover:text-primary">Seafood Restaurants</Link></li>
-            <li><Link href="/category/fish-and-chips-shop" className="hover:text-primary">Fish & Chips</Link></li>
+            <li><Link href="/seafood-restaurant" className="hover:text-primary">Seafood Restaurants</Link></li>
+            <li><Link href="/fish-and-chips-shop" className="hover:text-primary">Fish & Chips</Link></li>
           </ul>
         </div>
         <div>
