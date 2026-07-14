@@ -44,3 +44,6 @@ next-env.d.ts
 24-26 Data.xlsx
 Seafood Restaurant Directory Website Structure.docx
 Seafood Restaurant London - SEO Structure.xlsx
+
+# local data files (not for public repo)
+/data/
