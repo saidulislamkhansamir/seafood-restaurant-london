@@ -13,7 +13,7 @@ export function Footer() {
             borough.
           </p>
         </div>
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4 md:gap-16">
+        <div className="flex flex-wrap gap-x-16 gap-y-8">
           <div>
             <p className="font-semibold text-sm mb-3">Explore</p>
             <ul className="space-y-2 text-sm text-foreground/70">
