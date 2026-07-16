@@ -218,7 +218,13 @@ export async function submitRestaurant(input: {
   category?: string;
   address?: string;
   message?: string;
+  photo_storage_path?: string;
 }) {
   const { error } = await supabase.from("submissions").insert(input);
+  if (error) throw new Error(error.message);
+}
+
+export async function submitRestaurantPhoto(input: { restaurant_id: string; storage_path: string }) {
+  const { error } = await supabase.from("photo_submissions").insert(input);
   if (error) throw new Error(error.message);
 }

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Container } from "@/components/Container";
 import { StarRating } from "@/components/StarRating";
 import { MapEmbed } from "@/components/MapEmbed";
+import { SuggestPhotoForm } from "@/components/SuggestPhotoForm";
 import { categoryIcon, categoryGradient } from "@/lib/category-icon";
 import { getRestaurantBySlug } from "@/lib/data";
 import { slugify } from "@/lib/utils";
@@ -43,6 +45,7 @@ export default async function RestaurantPage({ params }: Props) {
     telephone: restaurant.phone ?? undefined,
     url: restaurant.website_url ?? undefined,
     priceRange: restaurant.price_range ?? undefined,
+    image: restaurant.photo_url ?? undefined,
     aggregateRating: restaurant.rating
       ? {
           "@type": "AggregateRating",
@@ -82,13 +85,26 @@ export default async function RestaurantPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
-      <div
-        className={`flex h-48 items-center justify-center bg-gradient-to-br text-7xl ${categoryGradient(
-          restaurant.primary_category ?? restaurant.name
-        )}`}
-      >
-        <span aria-hidden>{categoryIcon(restaurant.primary_category)}</span>
-      </div>
+      {restaurant.photo_url ? (
+        <div className="relative h-48 w-full sm:h-64">
+          <Image
+            src={restaurant.photo_url}
+            alt={restaurant.name}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
+          />
+        </div>
+      ) : (
+        <div
+          className={`flex h-48 items-center justify-center bg-gradient-to-br text-7xl ${categoryGradient(
+            restaurant.primary_category ?? restaurant.name
+          )}`}
+        >
+          <span aria-hidden>{categoryIcon(restaurant.primary_category)}</span>
+        </div>
+      )}
 
       <Container className="py-10">
         <nav className="mb-4 text-sm text-foreground/50">
@@ -207,6 +223,8 @@ export default async function RestaurantPage({ params }: Props) {
                 </div>
               ) : null}
             </dl>
+
+            {!restaurant.photo_url ? <SuggestPhotoForm restaurantId={restaurant.id} /> : null}
           </aside>
         </div>
       </Container>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { PhotoUploadField } from "@/components/PhotoUploadField";
 import { submitRestaurantAction, type SubmitState } from "./actions";
 
 const initialState: SubmitState = { status: "idle" };
@@ -71,6 +72,8 @@ export function AddRestaurantForm() {
         </label>
         <textarea id="message" name="message" rows={4} className={inputClass} />
       </div>
+
+      <PhotoUploadField name="photo_storage_path" label="Photo (optional)" />
 
       {state.status === "error" ? <p className="text-sm text-red-600">{state.message}</p> : null}
 

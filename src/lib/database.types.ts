@@ -7,6 +7,8 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -36,6 +38,38 @@ export type Database = {
         }
         Relationships: []
       }
+      photo_submissions: {
+        Row: {
+          created_at: string
+          id: string
+          restaurant_id: string
+          status: string
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          restaurant_id: string
+          status?: string
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          restaurant_id?: string
+          status?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photo_submissions_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurants: {
         Row: {
           attributes: string[] | null
@@ -62,6 +96,7 @@ export type Database = {
           name: string
           opening_hours: string | null
           phone: string | null
+          photo_url: string | null
           photos_count: number | null
           postcode: string | null
           postcode_district: string | null
@@ -102,6 +137,7 @@ export type Database = {
           name: string
           opening_hours?: string | null
           phone?: string | null
+          photo_url?: string | null
           photos_count?: number | null
           postcode?: string | null
           postcode_district?: string | null
@@ -142,6 +178,7 @@ export type Database = {
           name?: string
           opening_hours?: string | null
           phone?: string | null
+          photo_url?: string | null
           photos_count?: number | null
           postcode?: string | null
           postcode_district?: string | null
@@ -169,6 +206,7 @@ export type Database = {
           id: string
           message: string | null
           phone: string | null
+          photo_storage_path: string | null
           restaurant_name: string
           status: string | null
         }
@@ -181,6 +219,7 @@ export type Database = {
           id?: string
           message?: string | null
           phone?: string | null
+          photo_storage_path?: string | null
           restaurant_name: string
           status?: string | null
         }
@@ -193,6 +232,7 @@ export type Database = {
           id?: string
           message?: string | null
           phone?: string | null
+          photo_storage_path?: string | null
           restaurant_name?: string
           status?: string | null
         }

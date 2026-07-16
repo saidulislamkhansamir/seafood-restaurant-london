@@ -14,6 +14,15 @@ const RENAMED_RESTAURANT_SLUGS: [string, string][] = [
 ];
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "tprriulqoigcdduhcvvj.supabase.co",
+        pathname: "/storage/v1/object/public/restaurant-photos/**",
+      },
+    ],
+  },
   async redirects() {
     return RENAMED_RESTAURANT_SLUGS.map(([from, to]) => ({
       source: `/restaurants/${from}`,

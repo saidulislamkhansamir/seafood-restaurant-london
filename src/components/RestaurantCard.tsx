@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Restaurant } from "@/lib/data";
 import { StarRating } from "./StarRating";
 import { categoryIcon, categoryGradient } from "@/lib/category-icon";
@@ -9,13 +10,25 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
       href={`/restaurants/${restaurant.slug}`}
       className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-white transition-shadow hover:shadow-lg"
     >
-      <div
-        className={`flex h-32 items-center justify-center bg-gradient-to-br text-5xl ${categoryGradient(
-          restaurant.primary_category ?? restaurant.name
-        )}`}
-      >
-        <span aria-hidden>{categoryIcon(restaurant.primary_category)}</span>
-      </div>
+      {restaurant.photo_url ? (
+        <div className="relative h-32 w-full">
+          <Image
+            src={restaurant.photo_url}
+            alt={restaurant.name}
+            fill
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            className="object-cover"
+          />
+        </div>
+      ) : (
+        <div
+          className={`flex h-32 items-center justify-center bg-gradient-to-br text-5xl ${categoryGradient(
+            restaurant.primary_category ?? restaurant.name
+          )}`}
+        >
+          <span aria-hidden>{categoryIcon(restaurant.primary_category)}</span>
+        </div>
+      )}
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold leading-snug group-hover:text-primary transition-colors">

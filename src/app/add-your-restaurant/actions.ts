@@ -22,6 +22,7 @@ export async function submitRestaurantAction(
       category: String(formData.get("category") ?? "").trim() || undefined,
       address: String(formData.get("address") ?? "").trim() || undefined,
       message: String(formData.get("message") ?? "").trim() || undefined,
+      photo_storage_path: String(formData.get("photo_storage_path") ?? "").trim() || undefined,
     });
     return { status: "success", message: "Thanks — we'll review your listing and be in touch." };
   } catch {
