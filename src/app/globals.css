@@ -7,6 +7,7 @@
   --primary-dark: #0a3d37;
   --accent: #e8622c;
   --accent-dark: #c94f20;
+  --coral: #fa8072;
   --muted: #f0ede4;
   --border: #e3ded2;
 }
@@ -18,6 +19,7 @@
   --color-primary-dark: var(--primary-dark);
   --color-accent: var(--accent);
   --color-accent-dark: var(--accent-dark);
+  --color-coral: var(--coral);
   --color-muted: var(--muted);
   --color-border: var(--border);
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
