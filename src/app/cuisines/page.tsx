@@ -8,6 +8,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "All Cuisines",
   description: "Browse every restaurant category and cuisine listed on Seafood Restaurant London.",
+  alternates: { canonical: "/cuisines" },
 };
 
 export default async function CuisinesPage() {

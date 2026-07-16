@@ -4,6 +4,7 @@ import { Container } from "@/components/Container";
 export const metadata: Metadata = {
   title: "Contact",
   description: "Get in touch with Seafood Restaurant London.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {

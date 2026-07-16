@@ -8,6 +8,7 @@ import {
   getRestaurantsByBoroughAndCategorySlug,
   getRestaurantsByBoroughAndAreaSlug,
 } from "@/lib/data";
+import { breadcrumbJsonLd } from "@/lib/seo";
 
 export const revalidate = 3600;
 
@@ -39,6 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: result.label,
     description: `${result.label} — ratings, hours, menus and booking links.`,
+    alternates: { canonical: `/${locality}/${slug}` },
   };
 }
 
@@ -47,8 +49,18 @@ export default async function LocalityComboPage({ params }: Props) {
   const result = await resolve(locality, slug);
   if (!result) notFound();
 
+  const breadcrumb = breadcrumbJsonLd([
+    { name: "All Restaurants", path: "/restaurants" },
+    { name: result.borough ?? "", path: `/${locality}` },
+    { name: result.label, path: `/${locality}/${slug}` },
+  ]);
+
   return (
     <Container className="py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
+      />
       <h1 className="text-3xl font-bold">{result.label}</h1>
       <p className="mt-2 text-foreground/60">{result.restaurants.length} restaurants found</p>
 

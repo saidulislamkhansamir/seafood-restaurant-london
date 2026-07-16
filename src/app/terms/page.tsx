@@ -4,6 +4,7 @@ import { Container } from "@/components/Container";
 export const metadata: Metadata = {
   title: "Terms of Use",
   description: "Terms of use for Seafood Restaurant London.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

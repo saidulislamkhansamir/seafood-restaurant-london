@@ -15,6 +15,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `${name} Restaurants in London`,
     description: `London restaurants offering ${name.toLowerCase()} — ratings, hours and booking links.`,
+    alternates: { canonical: `/feature/${feature}` },
   };
 }
 

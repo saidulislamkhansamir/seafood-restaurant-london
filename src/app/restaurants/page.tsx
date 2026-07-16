@@ -8,17 +8,30 @@ import { getRestaurantsPage, getCategories, getBoroughs } from "@/lib/data";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "All Restaurants",
-  description: "Browse every restaurant listed on Seafood Restaurant London, filterable by cuisine, borough and area.",
-};
-
 const PAGE_SIZE = 24;
+
+type SearchParams = { q?: string; category?: string; borough?: string; page?: string };
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const hasFilters = Boolean(params.q || params.category || params.borough);
+  const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
+  const canonical = hasFilters || page <= 1 ? "/restaurants" : `/restaurants?page=${page}`;
+  return {
+    title: "All Restaurants",
+    description: "Browse every restaurant listed on Seafood Restaurant London, filterable by cuisine, borough and area.",
+    alternates: { canonical },
+  };
+}
 
 export default async function RestaurantsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; category?: string; borough?: string; page?: string }>;
+  searchParams: Promise<SearchParams>;
 }) {
   const params = await searchParams;
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);

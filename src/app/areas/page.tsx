@@ -8,6 +8,7 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "All Areas",
   description: "Browse restaurants by London borough on Seafood Restaurant London.",
+  alternates: { canonical: "/areas" },
 };
 
 export default async function AreasPage() {

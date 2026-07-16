@@ -5,6 +5,7 @@ import { Container } from "@/components/Container";
 export const metadata: Metadata = {
   title: "Advertise Your Restaurant",
   description: "Premium and featured listing packages on Seafood Restaurant London.",
+  alternates: { canonical: "/advertise" },
 };
 
 const TIERS = [

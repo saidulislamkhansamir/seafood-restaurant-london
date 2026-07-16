@@ -4,6 +4,7 @@ import { Container } from "@/components/Container";
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "How Seafood Restaurant London collects and uses data.",
+  alternates: { canonical: "/privacy-policy" },
 };
 
 export default function PrivacyPolicyPage() {

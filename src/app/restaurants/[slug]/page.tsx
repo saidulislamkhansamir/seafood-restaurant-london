@@ -7,6 +7,7 @@ import { MapEmbed } from "@/components/MapEmbed";
 import { categoryIcon, categoryGradient } from "@/lib/category-icon";
 import { getRestaurantBySlug } from "@/lib/data";
 import { slugify } from "@/lib/utils";
+import { breadcrumbJsonLd } from "@/lib/seo";
 
 export const revalidate = 3600;
 
@@ -24,6 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       `${restaurant.name} is a ${restaurant.primary_category ?? "restaurant"} in ${
         restaurant.borough ?? "London"
       }. See hours, menu, rating and booking details.`,
+    alternates: { canonical: `/restaurants/${slug}` },
   };
 }
 
@@ -62,11 +64,23 @@ export default async function RestaurantPage({ params }: Props) {
   }
   if (restaurant.website_url) links.push({ label: "Visit Website", href: restaurant.website_url });
 
+  const breadcrumb = breadcrumbJsonLd([
+    { name: "All Restaurants", path: "/restaurants" },
+    ...(restaurant.borough
+      ? [{ name: restaurant.borough, path: `/${slugify(restaurant.borough)}` }]
+      : []),
+    { name: restaurant.name, path: `/restaurants/${slug}` },
+  ]);
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
       <div
         className={`flex h-48 items-center justify-center bg-gradient-to-br text-7xl ${categoryGradient(

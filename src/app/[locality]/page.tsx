@@ -9,6 +9,7 @@ import {
   getAreas,
   getCategories,
 } from "@/lib/data";
+import { breadcrumbJsonLd } from "@/lib/seo";
 
 export const revalidate = 3600;
 
@@ -36,6 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       result.kind === "borough"
         ? `Seafood, fish & chips and takeaway restaurants in ${result.borough}, London — ratings, hours and booking links.`
         : `Browse every ${result.category?.toLowerCase()} listed on Seafood Restaurant London, with ratings, hours and booking links.`,
+    alternates: { canonical: `/${locality}` },
   };
 }
 
@@ -52,8 +54,17 @@ export default async function LocalityPage({ params }: Props) {
   );
   const categories = isBorough ? allCategories.filter((c) => restaurantCategorySlugs.has(c.name)) : [];
 
+  const breadcrumb = breadcrumbJsonLd([
+    { name: "All Restaurants", path: "/restaurants" },
+    { name: result.label, path: `/${locality}` },
+  ]);
+
   return (
     <Container className="py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
+      />
       <h1 className="text-3xl font-bold">{result.label}</h1>
       <p className="mt-2 text-foreground/60">{result.restaurants.length} restaurants found</p>
 

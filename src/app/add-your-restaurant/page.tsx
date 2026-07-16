@@ -5,6 +5,7 @@ import { AddRestaurantForm } from "./AddRestaurantForm";
 export const metadata: Metadata = {
   title: "Add Your Restaurant",
   description: "List your restaurant on Seafood Restaurant London for free — premium and featured placements also available.",
+  alternates: { canonical: "/add-your-restaurant" },
 };
 
 export default function AddYourRestaurantPage() {

@@ -6,6 +6,7 @@ import { POSTS } from "@/lib/posts";
 export const metadata: Metadata = {
   title: "Guides & Blog",
   description: "London seafood guides, best-of lists and dining tips from Seafood Restaurant London.",
+  alternates: { canonical: "/blog" },
 };
 
 export default function BlogIndexPage() {

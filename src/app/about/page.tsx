@@ -4,6 +4,7 @@ import { Container } from "@/components/Container";
 export const metadata: Metadata = {
   title: "About",
   description: "About Seafood Restaurant London, the directory for seafood and restaurant listings across the capital.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {

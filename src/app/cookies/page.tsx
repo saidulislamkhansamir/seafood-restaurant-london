@@ -4,6 +4,7 @@ import { Container } from "@/components/Container";
 export const metadata: Metadata = {
   title: "Cookies Policy",
   description: "How Seafood Restaurant London uses cookies.",
+  alternates: { canonical: "/cookies" },
 };
 
 export default function CookiesPage() {

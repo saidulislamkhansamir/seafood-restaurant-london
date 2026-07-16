@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Container } from "@/components/Container";
 import { SearchBar } from "@/components/SearchBar";
@@ -7,6 +8,10 @@ import { categoryIcon } from "@/lib/category-icon";
 import { POSTS } from "@/lib/posts";
 
 export const revalidate = 3600;
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default async function HomePage() {
   const [featured, categories, boroughs] = await Promise.all([
