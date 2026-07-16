@@ -17,23 +17,19 @@ export async function getFeaturedRestaurants(limit = 6): Promise<Restaurant[]> {
   return data ?? [];
 }
 
-export async function getAllRestaurants(filters?: {
+type RestaurantFilters = {
   category?: string;
   borough?: string;
   area?: string;
   q?: string;
-}): Promise<Restaurant[]> {
+};
+
+export async function getAllRestaurants(filters?: RestaurantFilters): Promise<Restaurant[]> {
   let query = supabase.from("restaurants").select("*").eq("listing_status", ACTIVE);
 
-  if (filters?.category) {
-    query = query.ilike("primary_category", filters.category);
-  }
-  if (filters?.borough) {
-    query = query.ilike("borough", filters.borough);
-  }
-  if (filters?.area) {
-    query = query.ilike("location_area", filters.area);
-  }
+  if (filters?.category) query = query.ilike("primary_category", filters.category);
+  if (filters?.borough) query = query.ilike("borough", filters.borough);
+  if (filters?.area) query = query.ilike("location_area", filters.area);
   if (filters?.q) {
     query = query.or(
       `name.ilike.%${filters.q}%,description.ilike.%${filters.q}%,location_area.ilike.%${filters.q}%`
@@ -42,6 +38,28 @@ export async function getAllRestaurants(filters?: {
 
   const { data } = await query.order("rating", { ascending: false });
   return data ?? [];
+}
+
+export async function getRestaurantsPage(
+  filters: RestaurantFilters | undefined,
+  page = 1,
+  pageSize = 24
+): Promise<{ restaurants: Restaurant[]; total: number; page: number; pageSize: number }> {
+  let query = supabase.from("restaurants").select("*", { count: "exact" }).eq("listing_status", ACTIVE);
+
+  if (filters?.category) query = query.ilike("primary_category", filters.category);
+  if (filters?.borough) query = query.ilike("borough", filters.borough);
+  if (filters?.area) query = query.ilike("location_area", filters.area);
+  if (filters?.q) {
+    query = query.or(
+      `name.ilike.%${filters.q}%,description.ilike.%${filters.q}%,location_area.ilike.%${filters.q}%`
+    );
+  }
+
+  const from = (page - 1) * pageSize;
+  const to = from + pageSize - 1;
+  const { data, count } = await query.order("rating", { ascending: false }).range(from, to);
+  return { restaurants: data ?? [], total: count ?? 0, page, pageSize };
 }
 
 export async function getRestaurantBySlug(slug: string): Promise<Restaurant | null> {

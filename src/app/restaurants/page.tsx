@@ -3,7 +3,8 @@ import Link from "next/link";
 import { Container } from "@/components/Container";
 import { SearchBar } from "@/components/SearchBar";
 import { RestaurantCard } from "@/components/RestaurantCard";
-import { getAllRestaurants, getCategories, getBoroughs } from "@/lib/data";
+import { Pagination } from "@/components/Pagination";
+import { getRestaurantsPage, getCategories, getBoroughs } from "@/lib/data";
 
 export const revalidate = 3600;
 
@@ -12,22 +13,26 @@ export const metadata: Metadata = {
   description: "Browse every restaurant listed on Seafood Restaurant London, filterable by cuisine, borough and area.",
 };
 
+const PAGE_SIZE = 24;
+
 export default async function RestaurantsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; category?: string; borough?: string }>;
+  searchParams: Promise<{ q?: string; category?: string; borough?: string; page?: string }>;
 }) {
   const params = await searchParams;
-  const [restaurants, categories, boroughs] = await Promise.all([
-    getAllRestaurants({ q: params.q, category: params.category, borough: params.borough }),
+  const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
+  const [{ restaurants, total, pageSize }, categories, boroughs] = await Promise.all([
+    getRestaurantsPage({ q: params.q, category: params.category, borough: params.borough }, page, PAGE_SIZE),
     getCategories(),
     getBoroughs(),
   ]);
+  const totalPages = Math.ceil(total / pageSize);
 
   return (
     <Container className="py-12">
       <h1 className="text-3xl font-bold">All Restaurants</h1>
-      <p className="mt-2 text-foreground/60">{restaurants.length} restaurants found</p>
+      <p className="mt-2 text-foreground/60">{total} restaurants found</p>
 
       <div className="mt-6">
         <SearchBar initialQuery={params.q} />
@@ -58,11 +63,14 @@ export default async function RestaurantsPage({
       </div>
 
       {restaurants.length > 0 ? (
-        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {restaurants.map((r) => (
-            <RestaurantCard key={r.id} restaurant={r} />
-          ))}
-        </div>
+        <>
+          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {restaurants.map((r) => (
+              <RestaurantCard key={r.id} restaurant={r} />
+            ))}
+          </div>
+          <Pagination page={page} totalPages={totalPages} searchParams={params} />
+        </>
       ) : (
         <p className="mt-10 text-foreground/60">No restaurants match that search yet — try a different term.</p>
       )}
