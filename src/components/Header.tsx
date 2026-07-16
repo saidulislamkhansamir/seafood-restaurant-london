@@ -1,6 +1,6 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Container } from "./Container";
-import { Logo } from "./Logo";
 
 const NAV = [
   { href: "/restaurants", label: "All Restaurants" },
@@ -14,7 +14,7 @@ export function Header() {
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
       <Container className="flex h-16 items-center justify-between gap-4">
         <Link href="/" className="shrink-0">
-          <Logo />
+          <Image src="/logo/logo.png" alt="Seafood Restaurant London" width={760} height={230} priority className="h-14 w-auto" />
         </Link>
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-foreground/80">
           {NAV.map((item) => (

@@ -1,17 +1,14 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Container } from "./Container";
-import { LogoMark } from "./Logo";
 
 export function Footer() {
   return (
     <footer className="mt-24 border-t border-border bg-muted">
       <Container className="py-12 grid gap-8 sm:grid-cols-2 md:grid-cols-5">
         <div>
-          <div className="flex items-center gap-2">
-            <LogoMark className="h-7 w-7 shrink-0" />
-            <p className="text-lg font-bold text-primary-dark">Seafood Restaurant London</p>
-          </div>
-          <p className="mt-2 text-sm text-foreground/70">
+          <Image src="/logo/logo.png" alt="Seafood Restaurant London" width={760} height={230} className="h-16 w-auto" />
+          <p className="mt-3 text-sm text-foreground/70">
             The London restaurant directory — seafood, fish & chips, takeaway and more, borough by
             borough.
           </p>
