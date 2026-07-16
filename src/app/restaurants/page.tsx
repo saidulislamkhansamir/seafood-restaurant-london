@@ -38,8 +38,8 @@ export default async function RestaurantsPage({
         <SearchBar initialQuery={params.q} />
       </div>
 
-      <div className="mt-6 flex flex-wrap gap-2">
-        {categories.map((cat) => (
+      <div className="mt-6 flex flex-wrap items-center gap-2">
+        {categories.slice(0, 10).map((cat) => (
           <Link
             key={cat.slug}
             href={`/${cat.slug}`}
@@ -48,10 +48,13 @@ export default async function RestaurantsPage({
             {cat.name}
           </Link>
         ))}
+        <Link href="/cuisines" className="text-xs font-semibold text-primary hover:underline">
+          All cuisines →
+        </Link>
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        {boroughs.map((b) => (
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {boroughs.slice(0, 8).map((b) => (
           <Link
             key={b.slug}
             href={`/${b.slug}`}
@@ -60,6 +63,9 @@ export default async function RestaurantsPage({
             {b.name}
           </Link>
         ))}
+        <Link href="/areas" className="text-xs font-semibold text-primary hover:underline">
+          All areas →
+        </Link>
       </div>
 
       {restaurants.length > 0 ? (
