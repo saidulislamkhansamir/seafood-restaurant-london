@@ -3,8 +3,8 @@ import Link from "next/link";
 import { Container } from "@/components/Container";
 import { SearchBar } from "@/components/SearchBar";
 import { RestaurantCard } from "@/components/RestaurantCard";
-import { getFeaturedRestaurants, getCategories, getBoroughs } from "@/lib/data";
-import { categoryIcon } from "@/lib/category-icon";
+import { getFeaturedRestaurants, getCategories, getBoroughs, getRestaurantsCount } from "@/lib/data";
+import { categoryIcon, categoryTint } from "@/lib/category-icon";
 import { POSTS } from "@/lib/posts";
 
 export const revalidate = 3600;
@@ -14,16 +14,34 @@ export const metadata: Metadata = {
 };
 
 export default async function HomePage() {
-  const [featured, categories, boroughs] = await Promise.all([
+  const [featured, categories, boroughs, restaurantsCount] = await Promise.all([
     getFeaturedRestaurants(6),
     getCategories(),
     getBoroughs(),
+    getRestaurantsCount(),
   ]);
+
+  const topCategories = categories.slice(0, 8);
+  const topBoroughs = boroughs.slice(0, 10);
+
+  const stats = [
+    { value: `${restaurantsCount}+`, label: "Restaurants" },
+    { value: `${boroughs.length}`, label: "Boroughs" },
+    { value: `${categories.length}`, label: "Cuisines" },
+  ];
 
   return (
     <>
-      <section className="border-b border-border bg-gradient-to-b from-muted to-background">
-        <Container className="flex flex-col items-center gap-6 py-20 text-center">
+      <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-muted to-background">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-24 left-1/2 h-96 w-[42rem] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-32 right-0 h-72 w-72 rounded-full bg-coral/15 blur-3xl"
+        />
+        <Container className="relative flex flex-col items-center gap-6 py-20 text-center sm:py-28">
           <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-primary-dark sm:text-5xl">
             Seafood Restaurant London — Find the Best Seafood in the City
           </h1>
@@ -32,6 +50,19 @@ export default async function HomePage() {
             ratings, hours, menus and booking links in one place.
           </p>
           <SearchBar />
+
+          <div className="mt-2 flex items-center gap-6 sm:gap-10">
+            {stats.map((stat, i) => (
+              <div key={stat.label} className="flex items-center gap-6 sm:gap-10">
+                {i > 0 ? <span className="h-8 w-px bg-border" aria-hidden /> : null}
+                <div>
+                  <p className="text-2xl font-bold text-primary-dark sm:text-3xl">{stat.value}</p>
+                  <p className="text-xs uppercase tracking-wide text-foreground/50">{stat.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
           <Link
             href="/add-your-restaurant"
             className="text-sm font-semibold text-primary underline underline-offset-4 hover:text-primary-dark"
@@ -41,36 +72,63 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      {categories.length > 0 ? (
-        <section className="py-16">
+      {topCategories.length > 0 ? (
+        <section className="py-16 sm:py-20">
           <Container>
-            <h2 className="text-2xl font-bold mb-6">Browse by Cuisine</h2>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-              {categories.map((cat) => (
+            <div className="mb-8 flex items-end justify-between">
+              <div>
+                <h2 className="text-2xl font-bold sm:text-3xl">Browse by Cuisine</h2>
+                <p className="mt-1 text-sm text-foreground/60">
+                  The most popular cuisines across London, by number of listings.
+                </p>
+              </div>
+              <Link
+                href="/cuisines"
+                className="hidden shrink-0 text-sm font-semibold text-primary hover:text-primary-dark sm:inline-block"
+              >
+                All cuisines →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+              {topCategories.map((cat) => (
                 <Link
                   key={cat.slug}
                   href={`/${cat.slug}`}
-                  className="flex items-center gap-3 rounded-xl border border-border bg-white p-4 hover:border-primary hover:shadow-sm transition"
+                  className="group flex flex-col gap-3 rounded-2xl border border-border bg-white p-5 transition hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
                 >
-                  <span className="text-2xl" aria-hidden>
+                  <span
+                    className={`flex h-12 w-12 items-center justify-center rounded-full text-2xl ${categoryTint(cat.name)}`}
+                    aria-hidden
+                  >
                     {categoryIcon(cat.name)}
                   </span>
                   <span>
-                    <span className="block text-sm font-semibold">{cat.name}</span>
-                    <span className="block text-xs text-foreground/60">{cat.count} listed</span>
+                    <span className="block font-semibold group-hover:text-primary transition-colors">
+                      {cat.name}
+                    </span>
+                    <span className="block text-sm text-foreground/50">{cat.count} listed</span>
                   </span>
                 </Link>
               ))}
             </div>
+            <Link
+              href="/cuisines"
+              className="mt-6 block text-center text-sm font-semibold text-primary hover:text-primary-dark sm:hidden"
+            >
+              All cuisines →
+            </Link>
           </Container>
         </section>
       ) : null}
 
       {featured.length > 0 ? (
-        <section className="py-16 bg-muted">
+        <section className="py-16 bg-muted sm:py-20">
           <Container>
-            <div className="mb-6 flex items-end justify-between">
-              <h2 className="text-2xl font-bold">Featured Restaurants</h2>
+            <div className="mb-8 flex items-end justify-between">
+              <div>
+                <h2 className="text-2xl font-bold sm:text-3xl">Featured Restaurants</h2>
+                <p className="mt-1 text-sm text-foreground/60">Hand-picked spots worth booking first.</p>
+              </div>
               <Link href="/restaurants" className="text-sm font-semibold text-primary hover:text-primary-dark">
                 View all →
               </Link>
@@ -84,16 +142,21 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      {boroughs.length > 0 ? (
-        <section className="py-16">
+      {topBoroughs.length > 0 ? (
+        <section className="py-16 sm:py-20">
           <Container>
-            <h2 className="text-2xl font-bold mb-6">Explore by Borough</h2>
+            <div className="mb-8 flex items-end justify-between">
+              <h2 className="text-2xl font-bold sm:text-3xl">Explore by Borough</h2>
+              <Link href="/areas" className="text-sm font-semibold text-primary hover:text-primary-dark">
+                All areas →
+              </Link>
+            </div>
             <div className="flex flex-wrap gap-2">
-              {boroughs.map((b) => (
+              {topBoroughs.map((b) => (
                 <Link
                   key={b.slug}
                   href={`/${b.slug}`}
-                  className="rounded-full border border-border bg-white px-4 py-2 text-sm hover:border-primary hover:text-primary transition"
+                  className="rounded-full border border-border bg-white px-4 py-2 text-sm transition hover:border-primary hover:text-primary hover:shadow-sm"
                 >
                   {b.name} <span className="text-foreground/50">({b.count})</span>
                 </Link>
@@ -103,10 +166,10 @@ export default async function HomePage() {
         </section>
       ) : null}
 
-      <section className="py-16 bg-muted">
+      <section className="py-16 bg-muted sm:py-20">
         <Container>
-          <div className="mb-6 flex items-end justify-between">
-            <h2 className="text-2xl font-bold">From the Blog</h2>
+          <div className="mb-8 flex items-end justify-between">
+            <h2 className="text-2xl font-bold sm:text-3xl">From the Blog</h2>
             <Link href="/blog" className="text-sm font-semibold text-primary hover:text-primary-dark">
               View all →
             </Link>
@@ -116,7 +179,7 @@ export default async function HomePage() {
               <Link
                 key={post.slug}
                 href={`/blog/${post.slug}`}
-                className="rounded-2xl border border-border bg-white p-6 hover:shadow-lg transition-shadow"
+                className="rounded-2xl border border-border bg-white p-6 transition hover:-translate-y-0.5 hover:shadow-md"
               >
                 <h3 className="font-semibold leading-snug">{post.title}</h3>
                 <p className="mt-2 text-sm text-foreground/60">{post.excerpt}</p>
@@ -126,8 +189,8 @@ export default async function HomePage() {
         </Container>
       </section>
 
-      <section className="py-20">
-        <Container className="flex flex-col items-center gap-4 rounded-3xl bg-primary px-8 py-16 text-center text-white">
+      <section className="py-20 sm:py-24">
+        <Container className="flex flex-col items-center gap-4 rounded-3xl bg-primary px-8 py-16 text-center text-white sm:py-20">
           <h2 className="text-3xl font-bold">List Your Restaurant on Seafood Restaurant London</h2>
           <p className="max-w-xl text-white/80">
             Free basic listings, with premium placement and featured spots available to reach more

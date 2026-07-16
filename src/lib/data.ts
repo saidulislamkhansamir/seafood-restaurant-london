@@ -6,6 +6,14 @@ export type Restaurant = Tables<"restaurants">;
 
 const ACTIVE = "Active";
 
+export async function getRestaurantsCount(): Promise<number> {
+  const { count } = await supabase
+    .from("restaurants")
+    .select("*", { count: "exact", head: true })
+    .eq("listing_status", ACTIVE);
+  return count ?? 0;
+}
+
 export async function getFeaturedRestaurants(limit = 6): Promise<Restaurant[]> {
   const { data } = await supabase
     .from("restaurants")

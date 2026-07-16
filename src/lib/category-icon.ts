@@ -29,3 +29,11 @@ export function categoryGradient(seed: string): string {
   for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) | 0;
   return GRADIENTS[Math.abs(hash) % GRADIENTS.length];
 }
+
+const TINTS = ["bg-primary/10 text-primary", "bg-accent/10 text-accent", "bg-coral/15 text-accent-dark"];
+
+export function categoryTint(seed: string): string {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) | 0;
+  return TINTS[Math.abs(hash) % TINTS.length];
+}
