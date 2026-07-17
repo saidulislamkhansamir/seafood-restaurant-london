@@ -13,6 +13,10 @@ const RENAMED_RESTAURANT_SLUGS: [string, string][] = [
   ["l-oscar-restaurant-l-oscar-london-holborn-bloomsbury", "l-oscar-restaurant-holborn-bloomsbury"],
 ];
 
+const RENAMED_BLOG_SLUGS: [string, string][] = [
+  ["top-10-seafood-buffets-in-london", "best-seafood-boils-in-london"],
+];
+
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -24,11 +28,18 @@ const nextConfig: NextConfig = {
     ],
   },
   async redirects() {
-    return RENAMED_RESTAURANT_SLUGS.map(([from, to]) => ({
-      source: `/restaurants/${from}`,
-      destination: `/restaurants/${to}`,
-      permanent: true,
-    }));
+    return [
+      ...RENAMED_RESTAURANT_SLUGS.map(([from, to]) => ({
+        source: `/restaurants/${from}`,
+        destination: `/restaurants/${to}`,
+        permanent: true,
+      })),
+      ...RENAMED_BLOG_SLUGS.map(([from, to]) => ({
+        source: `/blog/${from}`,
+        destination: `/blog/${to}`,
+        permanent: true,
+      })),
+    ];
   },
 };
 
