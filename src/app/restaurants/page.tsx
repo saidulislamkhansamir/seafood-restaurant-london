@@ -91,7 +91,7 @@ export default async function RestaurantsPage({
           <Pagination page={page} totalPages={totalPages} searchParams={params} />
         </>
       ) : (
-        <p className="mt-10 text-foreground/60">No restaurants match that search yet — try a different term.</p>
+        <p className="mt-10 text-foreground/60">No restaurants match that search yet. Try a different term.</p>
       )}
     </Container>
   );

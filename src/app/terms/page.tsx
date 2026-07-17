@@ -19,7 +19,7 @@ export default function TermsPage() {
           <p className="mt-2">
             Seafood Restaurant London is a directory of restaurants across London, provided for
             informational purposes. Listing details (hours, ratings, menus, etc.) are sourced from
-            public listings and owner submissions and may change without notice — always confirm
+            public listings and owner submissions and may change without notice. Always confirm
             directly with the restaurant before visiting.
           </p>
         </section>
@@ -50,7 +50,7 @@ export default function TermsPage() {
         </section>
 
         <p className="text-sm text-foreground/50 italic">
-          This is a general-purpose template, not legal advice — have it reviewed before the site
+          This is a general-purpose template, not legal advice. Have it reviewed before the site
           goes live, especially once paid listings/advertising are introduced.
         </p>
       </div>

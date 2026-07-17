@@ -9,7 +9,7 @@ export function Footer() {
         <div className="max-w-xs">
           <Image src="/logo/logo.png" alt="Seafood Restaurant London" width={760} height={230} className="h-16 w-auto" />
           <p className="mt-3 text-sm text-foreground/70">
-            The London restaurant directory — seafood, fish & chips, takeaway and more, borough by
+            The London restaurant directory: seafood, fish & chips, takeaway and more, borough by
             borough.
           </p>
         </div>

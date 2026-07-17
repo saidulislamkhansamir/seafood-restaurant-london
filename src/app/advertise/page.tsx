@@ -12,7 +12,7 @@ const TIERS = [
   {
     name: "Free Listing",
     price: "£0",
-    description: "Name, address, contact details and category — get discovered on the directory.",
+    description: "Name, address, contact details and category: get discovered on the directory.",
     features: ["Basic listing", "Category & borough pages", "Google Maps link"],
   },
   {

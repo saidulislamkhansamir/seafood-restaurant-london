@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!result) return {};
   return {
     title: result.label,
-    description: `${result.label} — ratings, hours, menus and booking links.`,
+    description: `${result.label}, with ratings, hours, menus and booking links.`,
     alternates: { canonical: `/${locality}/${slug}` },
   };
 }

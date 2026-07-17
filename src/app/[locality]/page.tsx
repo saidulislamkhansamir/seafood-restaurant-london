@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: result.label,
     description:
       result.kind === "borough"
-        ? `Seafood, fish & chips and takeaway restaurants in ${result.borough}, London — ratings, hours and booking links.`
+        ? `Seafood, fish & chips and takeaway restaurants in ${result.borough}, London, with ratings, hours and booking links.`
         : `Browse every ${result.category?.toLowerCase()} listed on Seafood Restaurant London, with ratings, hours and booking links.`,
     alternates: { canonical: `/${locality}` },
   };

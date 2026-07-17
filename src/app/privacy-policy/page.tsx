@@ -54,7 +54,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <p className="text-sm text-foreground/50 italic">
-          This is a general-purpose template, not legal advice — have it reviewed before the site
+          This is a general-purpose template, not legal advice. Have it reviewed before the site
           goes live or starts running ads/analytics that process personal data.
         </p>
       </div>

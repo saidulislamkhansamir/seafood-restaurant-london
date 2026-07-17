@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const restaurant = await getRestaurantBySlug(slug);
   if (!restaurant) return {};
-  const title = `${restaurant.name}${restaurant.location_area ? ` — ${restaurant.location_area}` : ""}`;
+  const title = `${restaurant.name}${restaurant.location_area ? `, ${restaurant.location_area}` : ""}`;
   return {
     title,
     description:

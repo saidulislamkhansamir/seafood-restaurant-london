@@ -75,7 +75,7 @@ export function PhotoUploadField({
             alt="Preview"
             className="h-16 w-16 rounded-lg border border-border object-cover"
           />
-          <p className="text-xs text-foreground/60">Ready — {sizeKb} KB (WebP)</p>
+          <p className="text-xs text-foreground/60">Ready: {sizeKb} KB (WebP)</p>
         </div>
       ) : null}
     </div>

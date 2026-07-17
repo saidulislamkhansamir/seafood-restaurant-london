@@ -43,10 +43,10 @@ export default async function HomePage() {
         />
         <Container className="relative flex flex-col items-center gap-6 py-20 text-center sm:py-28">
           <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-primary-dark sm:text-5xl">
-            Seafood Restaurant London — Find the Best Seafood in the City
+            Seafood Restaurant London: Find the Best Seafood in the City
           </h1>
           <p className="max-w-xl text-lg text-foreground/70">
-            Browse seafood, fish &amp; chips, and takeaway spots across every London borough —
+            Browse seafood, fish &amp; chips, and takeaway spots across every London borough, with
             ratings, hours, menus and booking links in one place.
           </p>
           <SearchBar />
@@ -200,7 +200,7 @@ export default async function HomePage() {
             href="/add-your-restaurant"
             className="mt-2 rounded-full bg-accent px-6 py-3 font-semibold hover:bg-accent-dark transition-colors"
           >
-            Add Your Restaurant — Free
+            Add Your Restaurant (Free)
           </Link>
         </Container>
       </section>

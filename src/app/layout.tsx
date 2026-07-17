@@ -9,11 +9,11 @@ const siteUrl = "https://seafoodrestaurantlondon.co.uk";
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: "Seafood Restaurant London — Find the Best Seafood & Fish Restaurants",
+    default: "Seafood Restaurant London: Find the Best Seafood & Fish Restaurants",
     template: "%s | Seafood Restaurant London",
   },
   description:
-    "The London restaurant directory for seafood, fish & chips, takeaway and more — browse by cuisine, borough and area across Greater London.",
+    "The London restaurant directory for seafood, fish & chips, takeaway and more. Browse by cuisine, borough and area across Greater London.",
   openGraph: {
     type: "website",
     siteName: "Seafood Restaurant London",

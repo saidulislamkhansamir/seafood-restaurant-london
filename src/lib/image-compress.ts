@@ -54,5 +54,5 @@ export async function compressToWebp(
   }
 
   if (best) return best;
-  throw new Error("Couldn't compress that image small enough — try a simpler photo.");
+  throw new Error("Couldn't compress that image small enough. Try a simpler photo.");
 }

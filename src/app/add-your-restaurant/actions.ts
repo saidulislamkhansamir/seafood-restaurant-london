@@ -24,7 +24,7 @@ export async function submitRestaurantAction(
       message: String(formData.get("message") ?? "").trim() || undefined,
       photo_storage_path: String(formData.get("photo_storage_path") ?? "").trim() || undefined,
     });
-    return { status: "success", message: "Thanks — we'll review your listing and be in touch." };
+    return { status: "success", message: "Thanks! We'll review your listing and be in touch." };
   } catch {
     return { status: "error", message: "Something went wrong submitting the form. Please try again." };
   }

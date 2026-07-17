@@ -20,7 +20,7 @@ export default function CookiesPage() {
           cookies.
         </p>
         <p>
-          If that changes — for example, if we add Google AdSense or web analytics — this page will
+          If that changes (for example, if we add Google AdSense or web analytics), this page will
           be updated to describe what&apos;s used and how to opt out, and a cookie consent banner
           will be added where required.
         </p>
@@ -31,7 +31,7 @@ export default function CookiesPage() {
           </p>
         </section>
         <p className="text-sm text-foreground/50 italic">
-          This is a general-purpose template, not legal advice — revisit this page as soon as
+          This is a general-purpose template, not legal advice. Revisit this page as soon as
           analytics or ad cookies are actually added to the site.
         </p>
       </div>
