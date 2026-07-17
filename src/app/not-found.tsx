@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { Container } from "@/components/Container";
 import { SearchBar } from "@/components/SearchBar";
 
@@ -11,6 +12,13 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <Container className="flex flex-col items-center gap-6 py-24 text-center">
+      <Image
+        src="/logo/logo-gray.png"
+        alt="Seafood Restaurant London"
+        width={760}
+        height={230}
+        className="h-12 w-auto opacity-80"
+      />
       <p className="text-sm font-semibold text-primary">404</p>
       <h1 className="text-3xl font-bold text-primary-dark">We couldn&apos;t find that page</h1>
       <p className="max-w-md text-foreground/70">
