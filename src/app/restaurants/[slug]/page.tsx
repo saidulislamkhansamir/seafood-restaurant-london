@@ -6,7 +6,7 @@ import { Container } from "@/components/Container";
 import { StarRating } from "@/components/StarRating";
 import { MapEmbed } from "@/components/MapEmbed";
 import { SuggestPhotoForm } from "@/components/SuggestPhotoForm";
-import { categoryIcon, categoryGradient } from "@/lib/category-icon";
+import { categoryGradient } from "@/lib/category-icon";
 import { getRestaurantBySlug } from "@/lib/data";
 import { slugify } from "@/lib/utils";
 import { breadcrumbJsonLd } from "@/lib/seo";
@@ -98,11 +98,18 @@ export default async function RestaurantPage({ params }: Props) {
         </div>
       ) : (
         <div
-          className={`flex h-48 items-center justify-center bg-gradient-to-br text-7xl ${categoryGradient(
+          className={`flex h-48 items-center justify-center bg-gradient-to-br ${categoryGradient(
             restaurant.primary_category ?? restaurant.name
           )}`}
         >
-          <span aria-hidden>{categoryIcon(restaurant.primary_category)}</span>
+          <Image
+            src="/logo/brand-icon.png"
+            alt=""
+            aria-hidden
+            width={250}
+            height={175}
+            className="h-24 w-auto opacity-90 brightness-0 invert"
+          />
         </div>
       )}
 

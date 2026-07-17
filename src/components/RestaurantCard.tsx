@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Restaurant } from "@/lib/data";
 import { StarRating } from "./StarRating";
-import { categoryIcon, categoryGradient } from "@/lib/category-icon";
+import { categoryGradient } from "@/lib/category-icon";
 
 export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
   return (
@@ -22,11 +22,18 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
         </div>
       ) : (
         <div
-          className={`flex h-32 items-center justify-center bg-gradient-to-br text-5xl ${categoryGradient(
+          className={`flex h-32 items-center justify-center bg-gradient-to-br ${categoryGradient(
             restaurant.primary_category ?? restaurant.name
           )}`}
         >
-          <span aria-hidden>{categoryIcon(restaurant.primary_category)}</span>
+          <Image
+            src="/logo/brand-icon.png"
+            alt=""
+            aria-hidden
+            width={250}
+            height={175}
+            className="h-14 w-auto opacity-90 brightness-0 invert"
+          />
         </div>
       )}
       <div className="flex flex-1 flex-col gap-2 p-4">
