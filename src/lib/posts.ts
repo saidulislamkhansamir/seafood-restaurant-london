@@ -17,13 +17,76 @@ export type Post = {
 
 export const POSTS: Post[] = [
   {
-    slug: "best-oyster-happy-hours-in-london",
-    title: "Best Oyster Happy Hours in London",
-    excerpt: "Where to get quality oysters at a discount across the capital, from Soho to Canary Wharf.",
+    slug: "best-oyster-bars-in-london",
+    title: "Best Oyster Bars in London",
+    excerpt: "From casual Soho spots to long-running institutions, here's where to get good oysters across the capital.",
     content: [
-      "London's oyster bar scene has quietly become one of the best in Europe, and a growing number of spots run genuinely good happy hour deals rather than treating oysters as a once-a-year treat.",
-      "Look out for oyster bars in Soho and Covent Garden offering half-price shellfish during early evening sittings, a great way to try a venue before committing to a full dinner.",
-      "Browse our full list of oyster bars across London to find one near you, complete with opening hours and booking links.",
+      "London has a genuinely good oyster scene. You can find them everywhere from a quick counter seat in Soho to a proper sit-down dinner in Covent Garden, and the quality is usually high whichever way you go.",
+      "A quick note if you're searching for oyster happy hours: some restaurants do run early-evening deals, but these change often and aren't something we can guarantee is running right now. Your best bet is to call ahead or check the restaurant's own site before you go. What we can promise is that every restaurant below is a genuinely well-reviewed place to eat oysters, deal or no deal.",
+      "Oysters usually come two ways: native (in season roughly September to April, richer and more expensive) or rock oysters (available all year, milder and cheaper). Most of the restaurants below serve both, so you can compare side by side.",
+    ],
+    picks: [
+      {
+        heading: "Casual and easygoing",
+        name: "The Whistling Oyster",
+        slug: "the-whistling-oyster-chiswick",
+        area: "Chiswick, Hounslow",
+        blurb:
+          "The highest-rated oyster spot on this list at 4.8 stars, though from a smaller base of around 150 reviews. Oysters and fresh seafood are the whole point here.",
+      },
+      {
+        name: "Oysteria",
+        slug: "oysteria-canary-wharf-isle-of-dogs",
+        area: "Canary Wharf / Isle of Dogs, Tower Hamlets",
+        blurb:
+          "Rated 4.7 stars from nearly 1,900 reviews. Alongside oysters, it does scallops and full seafood platters if you want to share more than one dish.",
+      },
+      {
+        name: "Noisy Oyster Seafood Bistro",
+        slug: "noisy-oyster-seafood-bistro-whitechapel-spitalfields",
+        area: "Whitechapel / Spitalfields, Tower Hamlets",
+        blurb:
+          "A 4.6-star bistro with over 600 reviews, pairing oysters and fresh seafood with a solid cocktail list.",
+      },
+      {
+        name: "Randall & Aubin",
+        slug: "randall-and-aubin-soho-carnaby",
+        area: "Soho / Carnaby, Westminster",
+        blurb:
+          "A Soho fixture with over 2,100 reviews and a 4.6-star rating. It runs a champagne bar alongside its oysters and fresh fish, good for a celebration.",
+      },
+      {
+        heading: "Long-running favourites for a proper sit-down meal",
+        name: "J Sheekey",
+        slug: "j-sheekey-covent-garden",
+        area: "Covent Garden, Westminster",
+        blurb:
+          "A well-known Covent Garden address rated 4.5 stars from over 2,600 reviews. Oysters sit on the menu alongside lobster, fish pie and skate wing.",
+      },
+      {
+        name: "Bentley's Oyster Bar & Grill",
+        slug: "bentley-s-oyster-bar-and-grill-soho-west-end",
+        area: "Soho / West End, Westminster",
+        blurb:
+          "Rated 4.5 stars from over 2,000 reviews. As the name suggests, native oysters are the specialty, alongside grilled fish and lobster.",
+      },
+      {
+        name: "The Oystermen Seafood Bar & Kitchen",
+        slug: "the-oystermen-seafood-bar-and-kitchen-covent-garden",
+        area: "Covent Garden, Westminster",
+        blurb:
+          "A small, focused Covent Garden kitchen rated 4.5 stars from over 1,700 reviews, built entirely around oysters and fresh shellfish.",
+      },
+      {
+        name: "Wright Brothers Borough Market",
+        slug: "wright-brothers-borough-market-southwark-london-bridge",
+        area: "Borough Market, Southwark",
+        blurb:
+          "Rated 4.4 stars from over 1,400 reviews. A Borough Market institution serving oysters and seafood platters right by the market stalls.",
+      },
+    ],
+    closing: [
+      "Want to see every oyster and seafood spot we've listed, not just these eight? Browse the full seafood category with ratings, hours and booking links.",
     ],
   },
   {
@@ -88,11 +151,59 @@ export const POSTS: Post[] = [
   {
     slug: "where-to-eat-fresh-lobster-in-london",
     title: "Where to Eat Fresh Lobster in London",
-    excerpt: "From Mayfair institutions to casual lobster-and-burger chains, here's where to find it.",
+    excerpt: "From long-running Mayfair institutions to casual lobster-and-burger chains, here's where to find it.",
     content: [
-      "Lobster in London ranges from the whole-lobster-and-chips casual chains found in Soho, Mayfair and Canary Wharf, to the white-tablecloth seafood institutions of St James's and Knightsbridge.",
-      "If you're after something more casual, the lobster-roll-and-burger format has multiple London locations and consistently good reviews.",
-      "For a special occasion, the historic Mayfair seafood restaurants dating back to the 1800s remain some of the best-reviewed lobster spots in the city.",
+      "Lobster in London covers a lot of ground. On one end, you've got casual whole-lobster-and-chips chains where you can turn up in jeans. On the other, there are white-tablecloth seafood restaurants where lobster has been on the menu for decades.",
+      "Both are worth trying, and neither costs the same amount. Casual lobster rolls and burgers usually run £15 to £25. A proper sit-down whole lobster dinner at an upscale restaurant can run £40 to £70 or more per person.",
+    ],
+    picks: [
+      {
+        heading: "Casual and fun",
+        name: "Burger & Lobster – West India Quay",
+        slug: "burger-and-lobster-west-india-quay-canary-wharf-isle-of-dogs",
+        area: "Canary Wharf / Isle of Dogs, Tower Hamlets",
+        blurb:
+          "This casual chain has several branches across London, and this Canary Wharf one has the most reviews of any of them: over 10,000, at a 4.7-star rating. Order the whole lobster or a lobster roll, both come simple, with no fuss.",
+      },
+      {
+        name: "The Cajun Boil",
+        slug: "the-cajun-boil-bethnal-green",
+        area: "Bethnal Green, Tower Hamlets",
+        blurb:
+          "Rated 4.7 stars from 250 reviews. For a messier, hands-on lobster meal, this Bethnal Green spot serves a Cajun-style seafood boil with crab and lobster tipped straight onto your table.",
+      },
+      {
+        name: "Big Easy Bar.B.Q & Crabshack – Canary Wharf",
+        slug: "big-easy-bar-b-q-and-crabshack-canary-wharf-canary-wharf-isle-of-dogs",
+        area: "Canary Wharf / Isle of Dogs, Tower Hamlets",
+        blurb:
+          "The most-reviewed restaurant on this whole list, with over 14,000 reviews at a 4.4-star rating. Crab, lobster, jumbo shrimp and BBQ ribs all on one big American-style menu.",
+      },
+      {
+        heading: "For a special occasion",
+        name: "Scott's",
+        slug: "scott-s-mayfair",
+        area: "Mayfair, Westminster",
+        blurb:
+          "A well-known Mayfair address rated 4.6 stars from nearly 3,000 reviews. Lobster and native oysters are the standouts on a proper, dress-up-a-little menu.",
+      },
+      {
+        name: "J Sheekey",
+        slug: "j-sheekey-covent-garden",
+        area: "Covent Garden, Westminster",
+        blurb:
+          "Rated 4.5 stars from over 2,600 reviews. A long-running Covent Garden institution, known for its lobster, fish pie and skate wing.",
+      },
+      {
+        name: "Bentley's Oyster Bar & Grill",
+        slug: "bentley-s-oyster-bar-and-grill-soho-west-end",
+        area: "Soho / West End, Westminster",
+        blurb:
+          "Rated 4.5 stars from over 2,000 reviews. Alongside its famous oysters, Bentley's serves lobster and grilled fish in a classic, formal setting.",
+      },
+    ],
+    closing: [
+      "Fancy something else instead? Browse every seafood restaurant we've listed across London, with ratings, hours and booking links in one place.",
     ],
   },
 ];
