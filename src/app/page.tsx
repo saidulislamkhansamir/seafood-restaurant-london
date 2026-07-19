@@ -6,6 +6,7 @@ import { RestaurantCard } from "@/components/RestaurantCard";
 import { getFeaturedRestaurants, getCategories, getBoroughs, getRestaurantsCount } from "@/lib/data";
 import { categoryIcon, categoryTint } from "@/lib/category-icon";
 import { POSTS } from "@/lib/posts";
+import { faqJsonLd } from "@/lib/seo";
 
 export const revalidate = 3600;
 
@@ -28,6 +29,34 @@ export default async function HomePage() {
     { value: `${restaurantsCount}+`, label: "Restaurants" },
     { value: `${boroughs.length}`, label: "Boroughs" },
     { value: `${categories.length}`, label: "Cuisines" },
+  ];
+
+  const faqs = [
+    {
+      question: "What's the best seafood restaurant in London?",
+      answer:
+        "It depends on budget and borough. For a special occasion, Michelin-listed spots in Mayfair and Soho lead the way; for a quick, honest meal, a good local fish and chip shop often beats a tasting menu. Browse our Featured Restaurants above, or filter by borough and cuisine to find highly rated options near you.",
+    },
+    {
+      question: "How do I find fish and chip shops near me in London?",
+      answer:
+        "Use the search bar at the top of this page, or browse by borough to see every fish and chip shop, seafood restaurant and takeaway we've listed in that area, complete with ratings, opening hours and booking links where available.",
+    },
+    {
+      question: "Is it free to list a restaurant on this directory?",
+      answer:
+        "Yes. Basic listings are free for restaurant owners. Premium placement and featured spots are also available for restaurants that want extra visibility across the site.",
+    },
+    {
+      question: "Does this directory only cover seafood restaurants?",
+      answer:
+        "We started with seafood and fish and chips as our focus, and we're expanding borough by borough to cover more of London's restaurant scene, including other cuisines. Check Browse by Cuisine to see everything currently listed.",
+    },
+    {
+      question: "Can I book a table directly through the site?",
+      answer:
+        "Where a restaurant provides a booking link, it's included on their listing page alongside hours, menu and contact details, so you can book directly with the restaurant.",
+    },
   ];
 
   return (
@@ -69,6 +98,46 @@ export default async function HomePage() {
           >
             Own a restaurant? Add it for free →
           </Link>
+        </Container>
+      </section>
+
+      <section className="py-16 bg-muted sm:py-20">
+        <Container className="max-w-3xl">
+          <h2 className="text-2xl font-bold sm:text-3xl">Finding the Best Seafood in London</h2>
+          <div className="mt-6 space-y-4 text-foreground/80 leading-relaxed">
+            <p>
+              London&apos;s seafood scene runs from Billingsgate-supplied fine dining rooms in Mayfair
+              to the corner chippy that&apos;s been frying since your grandparents were young. We&apos;ve
+              pulled together {restaurantsCount}+ seafood restaurants, fish and chip shops and seafood
+              takeaways across {boroughs.length} London boroughs, so you can compare ratings, opening
+              hours, menus and booking links without switching between five different apps and maps.
+            </p>
+            <p>
+              Whether you want oysters and a bottle of Muscadet in Soho, a proper Friday-night fish
+              supper in Lewisham, or a Cantonese seafood banquet in Chinatown, start with{" "}
+              <Link href="/areas" className="font-semibold text-primary hover:text-primary-dark">
+                Explore by Borough
+              </Link>{" "}
+              if you know where you&apos;re eating, or{" "}
+              <Link href="/cuisines" className="font-semibold text-primary hover:text-primary-dark">
+                Browse by Cuisine
+              </Link>{" "}
+              if you know what you&apos;re craving. Every listing shows what we could verify directly
+              from the restaurant, so hours and contact details are accurate rather than guessed.
+            </p>
+            <p>
+              New to the site? The{" "}
+              <Link href="/restaurants" className="font-semibold text-primary hover:text-primary-dark">
+                full restaurant directory
+              </Link>{" "}
+              is searchable and filterable, and our{" "}
+              <Link href="/blog" className="font-semibold text-primary hover:text-primary-dark">
+                guides and blog
+              </Link>{" "}
+              cover specific questions, like where to find the best fish and chips in a given area, or
+              which boroughs are worth a special trip for seafood.
+            </p>
+          </div>
         </Container>
       </section>
 
@@ -184,6 +253,24 @@ export default async function HomePage() {
                 <h3 className="font-semibold leading-snug">{post.title}</h3>
                 <p className="mt-2 text-sm text-foreground/60">{post.excerpt}</p>
               </Link>
+            ))}
+          </div>
+        </Container>
+      </section>
+
+      <section className="py-16 sm:py-20">
+        <Container className="max-w-3xl">
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(faqs)) }}
+          />
+          <h2 className="text-2xl font-bold sm:text-3xl">Frequently Asked Questions</h2>
+          <div className="mt-6 divide-y divide-border">
+            {faqs.map((faq) => (
+              <div key={faq.question} className="py-5">
+                <h3 className="font-semibold">{faq.question}</h3>
+                <p className="mt-2 text-sm text-foreground/70 leading-relaxed">{faq.answer}</p>
+              </div>
             ))}
           </div>
         </Container>
