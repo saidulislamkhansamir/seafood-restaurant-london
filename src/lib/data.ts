@@ -80,6 +80,64 @@ export async function getRestaurantBySlug(slug: string): Promise<Restaurant | nu
   return data;
 }
 
+export async function getRelatedRestaurants(restaurant: Restaurant, limit = 6): Promise<Restaurant[]> {
+  const results: Restaurant[] = [];
+  const seen = new Set<string>([restaurant.id]);
+
+  async function addFrom(query: PromiseLike<{ data: Restaurant[] | null }>) {
+    if (results.length >= limit) return;
+    const { data } = await query;
+    for (const r of data ?? []) {
+      if (results.length >= limit) break;
+      if (seen.has(r.id)) continue;
+      seen.add(r.id);
+      results.push(r);
+    }
+  }
+
+  if (restaurant.borough && restaurant.primary_category) {
+    await addFrom(
+      supabase
+        .from("restaurants")
+        .select("*")
+        .eq("listing_status", ACTIVE)
+        .eq("borough", restaurant.borough)
+        .eq("primary_category", restaurant.primary_category)
+        .neq("id", restaurant.id)
+        .order("rating", { ascending: false })
+        .limit(limit)
+    );
+  }
+
+  if (restaurant.borough) {
+    await addFrom(
+      supabase
+        .from("restaurants")
+        .select("*")
+        .eq("listing_status", ACTIVE)
+        .eq("borough", restaurant.borough)
+        .neq("id", restaurant.id)
+        .order("rating", { ascending: false })
+        .limit(limit)
+    );
+  }
+
+  if (restaurant.primary_category) {
+    await addFrom(
+      supabase
+        .from("restaurants")
+        .select("*")
+        .eq("listing_status", ACTIVE)
+        .eq("primary_category", restaurant.primary_category)
+        .neq("id", restaurant.id)
+        .order("rating", { ascending: false })
+        .limit(limit)
+    );
+  }
+
+  return results.slice(0, limit);
+}
+
 export async function getCategories(): Promise<{ name: string; slug: string; count: number }[]> {
   const { data } = await supabase
     .from("restaurants")

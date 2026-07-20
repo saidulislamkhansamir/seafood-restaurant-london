@@ -6,10 +6,12 @@ import { Container } from "@/components/Container";
 import { StarRating } from "@/components/StarRating";
 import { MapEmbed } from "@/components/MapEmbed";
 import { SuggestPhotoForm } from "@/components/SuggestPhotoForm";
+import { RestaurantCard } from "@/components/RestaurantCard";
 import { categoryGradient } from "@/lib/category-icon";
-import { getRestaurantBySlug } from "@/lib/data";
+import { getRestaurantBySlug, getRelatedRestaurants } from "@/lib/data";
 import { slugify } from "@/lib/utils";
 import { breadcrumbJsonLd } from "@/lib/seo";
+import { groupAttributes } from "@/lib/attribute-groups";
 
 export const revalidate = 3600;
 
@@ -35,6 +37,9 @@ export default async function RestaurantPage({ params }: Props) {
   const { slug } = await params;
   const restaurant = await getRestaurantBySlug(slug);
   if (!restaurant) notFound();
+
+  const related = await getRelatedRestaurants(restaurant);
+  const attributeGroups = groupAttributes(restaurant.attributes ?? []);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -159,14 +164,18 @@ export default async function RestaurantPage({ params }: Props) {
               </div>
             ) : null}
 
-            {restaurant.attributes && restaurant.attributes.length > 0 ? (
-              <div className="mt-6">
-                <h2 className="font-semibold">Features</h2>
-                <ul className="mt-2 grid grid-cols-2 gap-y-1 text-sm text-foreground/70 sm:grid-cols-3">
-                  {restaurant.attributes.map((a) => (
-                    <li key={a}>✓ {a}</li>
-                  ))}
-                </ul>
+            {attributeGroups.length > 0 ? (
+              <div className="mt-8 space-y-6">
+                {attributeGroups.map((group) => (
+                  <div key={group.label}>
+                    <h2 className="font-semibold">{group.label}</h2>
+                    <ul className="mt-2 grid grid-cols-2 gap-y-1 text-sm text-foreground/70 sm:grid-cols-3">
+                      {group.items.map((a) => (
+                        <li key={a}>✓ {a}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
             ) : null}
           </div>
@@ -234,6 +243,17 @@ export default async function RestaurantPage({ params }: Props) {
             {!restaurant.photo_url ? <SuggestPhotoForm restaurantId={restaurant.id} /> : null}
           </aside>
         </div>
+
+        {related.length > 0 ? (
+          <div className="mt-16 border-t border-border pt-10">
+            <h2 className="text-xl font-bold">You Might Also Like</h2>
+            <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {related.map((r) => (
+                <RestaurantCard key={r.id} restaurant={r} />
+              ))}
+            </div>
+          </div>
+        ) : null}
       </Container>
     </>
   );
