@@ -10,8 +10,9 @@ import { RestaurantCard } from "@/components/RestaurantCard";
 import { categoryGradient } from "@/lib/category-icon";
 import { getRestaurantBySlug, getRelatedRestaurants } from "@/lib/data";
 import { slugify } from "@/lib/utils";
-import { breadcrumbJsonLd } from "@/lib/seo";
+import { breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 import { groupAttributes } from "@/lib/attribute-groups";
+import { buildRestaurantFaqs } from "@/lib/restaurant-faq";
 
 export const revalidate = 3600;
 
@@ -40,6 +41,7 @@ export default async function RestaurantPage({ params }: Props) {
 
   const related = await getRelatedRestaurants(restaurant);
   const attributeGroups = groupAttributes(restaurant.attributes ?? []);
+  const faqs = buildRestaurantFaqs(restaurant, attributeGroups);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -243,6 +245,24 @@ export default async function RestaurantPage({ params }: Props) {
             {!restaurant.photo_url ? <SuggestPhotoForm restaurantId={restaurant.id} /> : null}
           </aside>
         </div>
+
+        {faqs.length >= 2 ? (
+          <div className="mt-16 border-t border-border pt-10">
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd(faqs)) }}
+            />
+            <h2 className="text-xl font-bold">Frequently Asked Questions</h2>
+            <div className="mt-4 max-w-3xl divide-y divide-border">
+              {faqs.map((faq) => (
+                <div key={faq.question} className="py-4 first:pt-0">
+                  <h3 className="text-sm font-semibold">{faq.question}</h3>
+                  <p className="mt-1.5 text-sm text-foreground/70 leading-relaxed">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         {related.length > 0 ? (
           <div className="mt-16 border-t border-border pt-10">
