@@ -79,6 +79,7 @@ export type Database = {
           cuisine_tags: string[] | null
           delivery_platforms: string[] | null
           description: string | null
+          email: string | null
           full_address: string | null
           google_maps_url: string | null
           has_booking: boolean | null
@@ -94,6 +95,7 @@ export type Database = {
           location_area: string | null
           menu_link: string | null
           name: string
+          nearby_stations: Json | null
           opening_hours: string | null
           phone: string | null
           photo_url: string | null
@@ -120,6 +122,7 @@ export type Database = {
           cuisine_tags?: string[] | null
           delivery_platforms?: string[] | null
           description?: string | null
+          email?: string | null
           full_address?: string | null
           google_maps_url?: string | null
           has_booking?: boolean | null
@@ -135,6 +138,7 @@ export type Database = {
           location_area?: string | null
           menu_link?: string | null
           name: string
+          nearby_stations?: Json | null
           opening_hours?: string | null
           phone?: string | null
           photo_url?: string | null
@@ -161,6 +165,7 @@ export type Database = {
           cuisine_tags?: string[] | null
           delivery_platforms?: string[] | null
           description?: string | null
+          email?: string | null
           full_address?: string | null
           google_maps_url?: string | null
           has_booking?: boolean | null
@@ -176,6 +181,7 @@ export type Database = {
           location_area?: string | null
           menu_link?: string | null
           name?: string
+          nearby_stations?: Json | null
           opening_hours?: string | null
           phone?: string | null
           photo_url?: string | null

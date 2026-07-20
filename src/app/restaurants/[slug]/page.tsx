@@ -7,6 +7,7 @@ import { StarRating } from "@/components/StarRating";
 import { MapEmbed } from "@/components/MapEmbed";
 import { SuggestPhotoForm } from "@/components/SuggestPhotoForm";
 import { RestaurantCard } from "@/components/RestaurantCard";
+import { NearbyStations } from "@/components/NearbyStations";
 import { categoryGradient } from "@/lib/category-icon";
 import { getRestaurantBySlug, getRelatedRestaurants } from "@/lib/data";
 import { slugify } from "@/lib/utils";
@@ -188,6 +189,8 @@ export default async function RestaurantPage({ params }: Props) {
                 <MapEmbed lat={restaurant.lat} lng={restaurant.lng} label={restaurant.name} />
               </div>
             ) : null}
+
+            <NearbyStations data={restaurant.nearby_stations} />
 
             {links.length > 0 ? (
               <div className="flex flex-col gap-2">
