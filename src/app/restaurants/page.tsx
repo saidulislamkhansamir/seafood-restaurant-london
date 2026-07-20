@@ -80,14 +80,14 @@ export default async function RestaurantsPage({
       {showEditorial ? (
         <p className="mt-4 text-foreground/70 leading-relaxed">
           This is the full Seafood Restaurant London directory: every seafood restaurant, fish and
-          chip shop and seafood takeaway we've listed across Greater London, in one searchable page.
-          Search by name or dish below, or narrow things down by cuisine or borough if you already
-          know what you're after.
+          chip shop and seafood takeaway we&apos;ve listed across Greater London, in one searchable
+          page. Search by name or dish below, or narrow things down by cuisine or borough if you
+          already know what you&apos;re after.
         </p>
       ) : null}
 
       <div className="mt-6">
-        <SearchBar initialQuery={params.q} />
+        <SearchBar initialQuery={params.q} initialCategory={params.category} initialBorough={params.borough} />
       </div>
 
       <div className="mt-6 flex flex-wrap items-center gap-2">
