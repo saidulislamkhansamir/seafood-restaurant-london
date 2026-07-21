@@ -146,8 +146,8 @@ export default async function RestaurantPage({ params }: Props) {
 
         <div className="grid gap-10 lg:grid-cols-[2fr_1fr]">
           <div>
-            <h1 className="text-3xl font-bold">{restaurant.name}</h1>
-            <div className="mt-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-3xl font-bold">{restaurant.name}</h1>
               <StatusBadge status={restaurant.listing_status} liveStatus={liveStatus} detailed />
             </div>
             <div className="mt-3">
