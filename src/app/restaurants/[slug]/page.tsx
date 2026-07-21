@@ -16,6 +16,7 @@ import { breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 import { groupAttributes } from "@/lib/attribute-groups";
 import { buildRestaurantFaqs } from "@/lib/restaurant-faq";
 import { isActive, statusBannerMessage, statusBannerClasses } from "@/lib/restaurant-status";
+import { getLiveStatus } from "@/lib/opening-hours";
 
 export const revalidate = 3600;
 
@@ -45,6 +46,7 @@ export default async function RestaurantPage({ params }: Props) {
   const related = await getRelatedRestaurants(restaurant);
   const attributeGroups = groupAttributes(restaurant.attributes ?? []);
   const faqs = buildRestaurantFaqs(restaurant, attributeGroups);
+  const liveStatus = isActive(restaurant.listing_status) ? getLiveStatus(restaurant.opening_hours) : null;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -239,6 +241,15 @@ export default async function RestaurantPage({ params }: Props) {
               {restaurant.opening_hours ? (
                 <div>
                   <dt className="font-semibold text-foreground/50">Opening Hours</dt>
+                  {liveStatus ? (
+                    <p
+                      className={`mt-1 text-sm font-semibold ${
+                        liveStatus.open ? "text-green-700" : "text-red-600"
+                      }`}
+                    >
+                      {liveStatus.text}
+                    </p>
+                  ) : null}
                   <dd className="mt-1 whitespace-pre-line">{restaurant.opening_hours.replace(/\s\|\s/g, "\n")}</dd>
                 </div>
               ) : null}
