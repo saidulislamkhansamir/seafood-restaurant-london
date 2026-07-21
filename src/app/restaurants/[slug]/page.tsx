@@ -146,9 +146,7 @@ export default async function RestaurantPage({ params }: Props) {
           <div>
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-3xl font-bold">{restaurant.name}</h1>
-              {!isActive(restaurant.listing_status) ? (
-                <StatusBadge status={restaurant.listing_status} />
-              ) : null}
+              <StatusBadge status={restaurant.listing_status} />
             </div>
             <div className="mt-3">
               <StarRating rating={restaurant.rating} reviewCount={restaurant.review_count} />

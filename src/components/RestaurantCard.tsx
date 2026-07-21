@@ -4,11 +4,8 @@ import type { Restaurant } from "@/lib/data";
 import { StarRating } from "./StarRating";
 import { StatusBadge } from "./StatusBadge";
 import { categoryGradient } from "@/lib/category-icon";
-import { isActive } from "@/lib/restaurant-status";
 
 export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
-  const showStatusBadge = !isActive(restaurant.listing_status);
-
   return (
     <Link
       href={`/restaurants/${restaurant.slug}`}
@@ -23,9 +20,7 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             className="object-cover"
           />
-          {showStatusBadge ? (
-            <StatusBadge status={restaurant.listing_status} className="absolute left-2 top-2 shadow-sm" />
-          ) : null}
+          <StatusBadge status={restaurant.listing_status} className="absolute left-2 top-2 shadow-sm" />
         </div>
       ) : (
         <div
@@ -41,9 +36,7 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
             height={175}
             className="h-14 w-auto opacity-90 brightness-0 invert"
           />
-          {showStatusBadge ? (
-            <StatusBadge status={restaurant.listing_status} className="absolute left-2 top-2 shadow-sm" />
-          ) : null}
+          <StatusBadge status={restaurant.listing_status} className="absolute left-2 top-2 shadow-sm" />
         </div>
       )}
       <div className="flex flex-1 flex-col gap-2 p-4">
