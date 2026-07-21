@@ -1,8 +1,11 @@
-// Parses the free-text `opening_hours` field (e.g. "Mon: Closed | Tue–Thu: 6–10 PM | Fri–Sat: 12–10 PM",
-// or "Lunch Fri-Sun: 12:30-4:30 PM | Dinner Mon-Thu, Sun: 6:15-10:30 PM") into a weekly
-// schedule and derives a live "open now / closes at / opens at" status for the current
-// moment in the UK. Rows that don't match the expected "Day: Time" shape (e.g. "see
-// website", "onwards") are left unparsed and simply produce no live status — never guessed.
+// Parses the free-text `opening_hours` field into a weekly schedule and derives a live
+// "open now / closes at / opens at" status for the current moment in the UK. Handles day
+// ranges ("Tue–Thu"), comma day lists ("Mon-Thu, Sun"), "Daily", meal-period prefixes
+// ("Lunch Fri-Sun: ..."), multiple blocks per day joined by "," or "&", 24-hour clock
+// times, and harmless parenthetical detail ("(kitchen till 10 PM)") — which gets
+// stripped. Anything the source itself flags as uncertain ("approx", "varies", "see
+// website"...) or that doesn't match the expected "Day: Time" shape is left unparsed
+// and simply produces no live status — never guessed.
 
 type TimeBlock = { start: number; end: number }; // minutes since midnight; end may exceed 1440 if it crosses midnight
 type WeekSchedule = TimeBlock[][]; // index 0=Sun..6=Sat, matching Intl/Date weekday numbering
@@ -13,6 +16,25 @@ const DAY_INDEX: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu:
 const TIME_RANGE_RE =
   /^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*[–-]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/i;
 
+// Fallback for 24-hour clock times with no am/pm at all (e.g. "12:00–22:30").
+// Only accepted when one side is unambiguously > 12 — otherwise a plain
+// "9:00-5:00" typo could silently flip from an 8-hour to a 20-hour window.
+const HOUR24_RANGE_RE = /^(\d{1,2}):(\d{2})\s*[–-]\s*(\d{1,2}):(\d{2})$/;
+
+// Parenthetical annotations that signal the source itself is unsure
+// ("approx", "may vary", "see website"...) — when present, bail on the whole
+// record rather than presenting a guess as a confident fact.
+const UNCERTAINTY_RE = /vary|varies|varying|approx|unconfirm|see (website|google|instagram|facebook)|call ahead|tbc|subject to change/i;
+
+function stripAnnotations(raw: string): string | null {
+  let uncertain = false;
+  const cleaned = raw.replace(/\(([^)]*)\)/g, (_, inner: string) => {
+    if (UNCERTAINTY_RE.test(inner)) uncertain = true;
+    return "";
+  });
+  return uncertain ? null : cleaned;
+}
+
 function dayIndexFromAbbr(abbr: string): number | undefined {
   return DAY_INDEX[abbr.trim().toLowerCase().slice(0, 3)];
 }
@@ -20,6 +42,8 @@ function dayIndexFromAbbr(abbr: string): number | undefined {
 function parseDayToken(token: string): number[] | null {
   // strip an optional leading meal-period label, e.g. "Lunch Fri-Sun" -> "Fri-Sun"
   const trimmed = token.trim().replace(/^(lunch|dinner|breakfast|brunch)\s+/i, "");
+
+  if (/^(daily|every\s*day)$/i.test(trimmed)) return [0, 1, 2, 3, 4, 5, 6];
 
   const days = new Set<number>();
   for (const part of trimmed.split(",")) {
@@ -55,20 +79,45 @@ function parseTimeSpec(spec: string): TimeBlock[] | "closed" | null {
   if (/^closed$/i.test(trimmed)) return "closed";
 
   const blocks: TimeBlock[] = [];
-  for (const part of trimmed.split(",")) {
-    const m = part.trim().match(TIME_RANGE_RE);
-    if (!m) return null;
-    const [, sh, sm, sMer, eh, em, eMer] = m;
-    const startMeridiem = sMer ?? eMer;
-    const startMin = to24(parseInt(sh, 10), sm ? parseInt(sm, 10) : 0, startMeridiem);
-    let endMin = to24(parseInt(eh, 10), em ? parseInt(em, 10) : 0, eMer);
-    if (endMin <= startMin) endMin += 24 * 60; // crosses midnight
-    blocks.push({ start: startMin, end: endMin });
+  for (const partRaw of trimmed.split(/\s*[,&]\s*/)) {
+    const part = partRaw.trim();
+    if (!part) continue;
+
+    const m = part.match(TIME_RANGE_RE);
+    if (m) {
+      const [, sh, sm, sMer, eh, em, eMer] = m;
+      const startMeridiem = sMer ?? eMer;
+      const startMin = to24(parseInt(sh, 10), sm ? parseInt(sm, 10) : 0, startMeridiem);
+      let endMin = to24(parseInt(eh, 10), em ? parseInt(em, 10) : 0, eMer);
+      if (endMin <= startMin) endMin += 24 * 60; // crosses midnight
+      blocks.push({ start: startMin, end: endMin });
+      continue;
+    }
+
+    const m24 = part.match(HOUR24_RANGE_RE);
+    if (m24) {
+      const [, sh, sm, eh, em] = m24;
+      const sH = parseInt(sh, 10);
+      const eH = parseInt(eh, 10);
+      const sM = parseInt(sm, 10);
+      const eM = parseInt(em, 10);
+      if (sH > 23 || eH > 23 || sM > 59 || eM > 59) return null;
+      if (Math.max(sH, eH) <= 12) return null; // ambiguous without a clear 24h marker
+      const startMin = sH * 60 + sM;
+      let endMin = eH * 60 + eM;
+      if (endMin <= startMin) endMin += 24 * 60;
+      blocks.push({ start: startMin, end: endMin });
+      continue;
+    }
+
+    return null;
   }
-  return blocks;
+  return blocks.length ? blocks : null;
 }
 
-function parseOpeningHours(raw: string): WeekSchedule | null {
+function parseOpeningHours(rawInput: string): WeekSchedule | null {
+  const raw = stripAnnotations(rawInput);
+  if (raw === null) return null;
   const schedule: WeekSchedule = [[], [], [], [], [], [], []];
   for (const segment of raw.split("|")) {
     const colonIdx = segment.indexOf(":");
