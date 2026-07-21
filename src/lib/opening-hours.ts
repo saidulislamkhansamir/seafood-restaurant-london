@@ -1,8 +1,8 @@
-// Parses the free-text `opening_hours` field (e.g. "Mon: Closed | Tue–Thu: 6–10 PM | Fri–Sat: 12–10 PM")
-// into a weekly schedule and derives a live "open now / closes at / opens at" status for
-// the current moment in the UK. Rows that don't match the expected "Day: Time" shape
-// (e.g. "see website", "onwards") are left unparsed and simply produce no live status —
-// never guessed.
+// Parses the free-text `opening_hours` field (e.g. "Mon: Closed | Tue–Thu: 6–10 PM | Fri–Sat: 12–10 PM",
+// or "Lunch Fri-Sun: 12:30-4:30 PM | Dinner Mon-Thu, Sun: 6:15-10:30 PM") into a weekly
+// schedule and derives a live "open now / closes at / opens at" status for the current
+// moment in the UK. Rows that don't match the expected "Day: Time" shape (e.g. "see
+// website", "onwards") are left unparsed and simply produce no live status — never guessed.
 
 type TimeBlock = { start: number; end: number }; // minutes since midnight; end may exceed 1440 if it crosses midnight
 type WeekSchedule = TimeBlock[][]; // index 0=Sun..6=Sat, matching Intl/Date weekday numbering
@@ -18,23 +18,31 @@ function dayIndexFromAbbr(abbr: string): number | undefined {
 }
 
 function parseDayToken(token: string): number[] | null {
-  const trimmed = token.trim();
-  const rangeMatch = trimmed.match(/^([A-Za-z]{3,})\s*[–-]\s*([A-Za-z]{3,})$/);
-  if (rangeMatch) {
-    const startIdx = dayIndexFromAbbr(rangeMatch[1]);
-    const endIdx = dayIndexFromAbbr(rangeMatch[2]);
-    if (startIdx === undefined || endIdx === undefined) return null;
-    const days: number[] = [];
-    let i = startIdx;
-    for (let n = 0; n < 7; n++) {
-      days.push(i);
-      if (i === endIdx) break;
-      i = (i + 1) % 7;
+  // strip an optional leading meal-period label, e.g. "Lunch Fri-Sun" -> "Fri-Sun"
+  const trimmed = token.trim().replace(/^(lunch|dinner|breakfast|brunch)\s+/i, "");
+
+  const days = new Set<number>();
+  for (const part of trimmed.split(",")) {
+    const p = part.trim();
+    if (!p) continue;
+    const rangeMatch = p.match(/^([A-Za-z]{3,})\s*[–-]\s*([A-Za-z]{3,})$/);
+    if (rangeMatch) {
+      const startIdx = dayIndexFromAbbr(rangeMatch[1]);
+      const endIdx = dayIndexFromAbbr(rangeMatch[2]);
+      if (startIdx === undefined || endIdx === undefined) return null;
+      let i = startIdx;
+      for (let n = 0; n < 7; n++) {
+        days.add(i);
+        if (i === endIdx) break;
+        i = (i + 1) % 7;
+      }
+      continue;
     }
-    return days;
+    const single = dayIndexFromAbbr(p);
+    if (single === undefined) return null;
+    days.add(single);
   }
-  const single = dayIndexFromAbbr(trimmed);
-  return single === undefined ? null : [single];
+  return days.size ? Array.from(days) : null;
 }
 
 function to24(hour: number, minute: number, meridiem: string): number {
@@ -69,7 +77,9 @@ function parseOpeningHours(raw: string): WeekSchedule | null {
     if (!days) return null;
     const time = parseTimeSpec(segment.slice(colonIdx + 1));
     if (time === null) return null;
-    for (const d of days) schedule[d] = time === "closed" ? [] : time;
+    // accumulate rather than overwrite — the same day can appear in more than
+    // one segment (e.g. separate "Lunch" and "Dinner" entries)
+    for (const d of days) schedule[d] = time === "closed" ? [] : [...schedule[d], ...time];
   }
   return schedule;
 }
