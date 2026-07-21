@@ -4,10 +4,12 @@ import type { LiveStatus } from "@/lib/opening-hours";
 export function StatusBadge({
   status,
   liveStatus,
+  detailed = false,
   className = "",
 }: {
   status: string | null;
   liveStatus?: LiveStatus | null;
+  detailed?: boolean;
   className?: string;
 }) {
   const visual = statusVisual(status);
@@ -16,7 +18,11 @@ export function StatusBadge({
   // the page actually wants to know. Falls back to the plain status badge
   // when hours can't be parsed, and never applies to closed statuses.
   const showLive = isActive(status) && liveStatus;
-  const label = showLive ? (liveStatus.open ? "Open now" : "Closed now") : visual.label;
+  const shortLabel = showLive ? (liveStatus.open ? "Open now" : "Closed now") : visual.label;
+  const label =
+    showLive && detailed && liveStatus.changeLabel
+      ? `${shortLabel} · ${liveStatus.open ? "Closes" : "Opens"} at ${liveStatus.changeLabel}`
+      : shortLabel;
   const badgeClasses = showLive && !liveStatus.open
     ? "bg-red-50 text-red-700 border-red-200"
     : visual.badgeClasses;

@@ -83,7 +83,10 @@ function formatTime(min: number): string {
   return mm === 0 ? `${h} ${meridiem}` : `${h}:${String(mm).padStart(2, "0")} ${meridiem}`;
 }
 
-export type LiveStatus = { open: boolean; text: string };
+// `changeLabel` is just the time (and day, if not today) the status next
+// flips — e.g. "10 PM" or "11:30 AM Tue" — so callers can compose their own
+// wording ("Closes at" / "Opens at") instead of parsing a sentence back apart.
+export type LiveStatus = { open: boolean; changeLabel: string | null };
 
 export function getLiveStatus(openingHours: string | null, now: Date = new Date()): LiveStatus | null {
   if (!openingHours) return null;
@@ -108,13 +111,13 @@ export function getLiveStatus(openingHours: string | null, now: Date = new Date(
   const yesterdayIdx = (todayIdx + 6) % 7;
   for (const block of schedule[yesterdayIdx]) {
     if (block.end > 1440 && nowMin < block.end - 1440) {
-      return { open: true, text: `Open now · closes ${formatTime(block.end)}` };
+      return { open: true, changeLabel: formatTime(block.end) };
     }
   }
 
   for (const block of schedule[todayIdx]) {
     if (nowMin >= block.start && nowMin < Math.min(block.end, 1440)) {
-      return { open: true, text: `Open now · closes ${formatTime(block.end)}` };
+      return { open: true, changeLabel: formatTime(block.end) };
     }
   }
 
@@ -124,8 +127,8 @@ export function getLiveStatus(openingHours: string | null, now: Date = new Date(
     if (candidates.length === 0) continue;
     const next = candidates.reduce((a, b) => (a.start < b.start ? a : b));
     const when = offset === 0 ? formatTime(next.start) : `${formatTime(next.start)} ${DAY_LABELS[dayIdx]}`;
-    return { open: false, text: `Closed now · opens ${when}` };
+    return { open: false, changeLabel: when };
   }
 
-  return { open: false, text: "Closed now" };
+  return { open: false, changeLabel: null };
 }

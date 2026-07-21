@@ -146,9 +146,9 @@ export default async function RestaurantPage({ params }: Props) {
 
         <div className="grid gap-10 lg:grid-cols-[2fr_1fr]">
           <div>
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-3xl font-bold">{restaurant.name}</h1>
-              <StatusBadge status={restaurant.listing_status} liveStatus={liveStatus} />
+            <h1 className="text-3xl font-bold">{restaurant.name}</h1>
+            <div className="mt-2">
+              <StatusBadge status={restaurant.listing_status} liveStatus={liveStatus} detailed />
             </div>
             <div className="mt-3">
               <StarRating rating={restaurant.rating} reviewCount={restaurant.review_count} />
@@ -241,15 +241,6 @@ export default async function RestaurantPage({ params }: Props) {
               {restaurant.opening_hours ? (
                 <div>
                   <dt className="font-semibold text-foreground/50">Opening Hours</dt>
-                  {liveStatus ? (
-                    <p
-                      className={`mt-1 text-sm font-semibold ${
-                        liveStatus.open ? "text-green-700" : "text-red-600"
-                      }`}
-                    >
-                      {liveStatus.text}
-                    </p>
-                  ) : null}
                   <dd className="mt-1 whitespace-pre-line">{restaurant.opening_hours.replace(/\s\|\s/g, "\n")}</dd>
                 </div>
               ) : null}
