@@ -8,12 +8,14 @@ import { MapEmbed } from "@/components/MapEmbed";
 import { SuggestPhotoForm } from "@/components/SuggestPhotoForm";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { NearbyStations } from "@/components/NearbyStations";
+import { StatusBadge } from "@/components/StatusBadge";
 import { categoryGradient } from "@/lib/category-icon";
 import { getRestaurantBySlug, getRelatedRestaurants } from "@/lib/data";
 import { slugify } from "@/lib/utils";
 import { breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 import { groupAttributes } from "@/lib/attribute-groups";
 import { buildRestaurantFaqs } from "@/lib/restaurant-faq";
+import { isActive, statusBannerMessage, statusBannerClasses } from "@/lib/restaurant-status";
 
 export const revalidate = 3600;
 
@@ -134,9 +136,20 @@ export default async function RestaurantPage({ params }: Props) {
           ) : null}
         </nav>
 
+        {!isActive(restaurant.listing_status) ? (
+          <div className={`mb-6 rounded-xl border px-4 py-3 text-sm ${statusBannerClasses(restaurant.listing_status)}`}>
+            {statusBannerMessage(restaurant.listing_status)}
+          </div>
+        ) : null}
+
         <div className="grid gap-10 lg:grid-cols-[2fr_1fr]">
           <div>
-            <h1 className="text-3xl font-bold">{restaurant.name}</h1>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-3xl font-bold">{restaurant.name}</h1>
+              {!isActive(restaurant.listing_status) ? (
+                <StatusBadge status={restaurant.listing_status} />
+              ) : null}
+            </div>
             <div className="mt-3">
               <StarRating rating={restaurant.rating} reviewCount={restaurant.review_count} />
             </div>

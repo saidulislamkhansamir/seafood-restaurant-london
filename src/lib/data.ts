@@ -1,20 +1,21 @@
 import { supabase } from "./supabase";
 import type { Tables } from "./database.types";
 import { slugify, primaryAreaName } from "./utils";
+import { ACTIVE, LISTABLE_STATUSES, NOT_A_RESTAURANT } from "./restaurant-status";
 
 export type Restaurant = Tables<"restaurants">;
-
-const ACTIVE = "Active";
 
 export async function getRestaurantsCount(): Promise<number> {
   const { count } = await supabase
     .from("restaurants")
     .select("*", { count: "exact", head: true })
-    .eq("listing_status", ACTIVE);
+    .in("listing_status", LISTABLE_STATUSES);
   return count ?? 0;
 }
 
 export async function getFeaturedRestaurants(limit = 6): Promise<Restaurant[]> {
+  // Featured spots are strictly Active — a temporarily closed restaurant
+  // shouldn't be promoted, even though it still shows up in normal browsing.
   const { data } = await supabase
     .from("restaurants")
     .select("*")
@@ -33,7 +34,7 @@ type RestaurantFilters = {
 };
 
 export async function getAllRestaurants(filters?: RestaurantFilters): Promise<Restaurant[]> {
-  let query = supabase.from("restaurants").select("*").eq("listing_status", ACTIVE);
+  let query = supabase.from("restaurants").select("*").in("listing_status", LISTABLE_STATUSES);
 
   if (filters?.category) query = query.ilike("primary_category", filters.category);
   if (filters?.borough) query = query.ilike("borough", filters.borough);
@@ -53,7 +54,10 @@ export async function getRestaurantsPage(
   page = 1,
   pageSize = 24
 ): Promise<{ restaurants: Restaurant[]; total: number; page: number; pageSize: number }> {
-  let query = supabase.from("restaurants").select("*", { count: "exact" }).eq("listing_status", ACTIVE);
+  let query = supabase
+    .from("restaurants")
+    .select("*", { count: "exact" })
+    .in("listing_status", LISTABLE_STATUSES);
 
   if (filters?.category) query = query.ilike("primary_category", filters.category);
   if (filters?.borough) query = query.ilike("borough", filters.borough);
@@ -71,11 +75,14 @@ export async function getRestaurantsPage(
 }
 
 export async function getRestaurantBySlug(slug: string): Promise<Restaurant | null> {
+  // Permanently/temporarily closed pages stay reachable directly (e.g. from
+  // a search engine that already indexed them) even though they're excluded
+  // from listings — only "Not a Restaurant" rows are fully hidden.
   const { data } = await supabase
     .from("restaurants")
     .select("*")
     .eq("slug", slug)
-    .eq("listing_status", ACTIVE)
+    .neq("listing_status", NOT_A_RESTAURANT)
     .maybeSingle();
   return data;
 }
@@ -142,7 +149,7 @@ export async function getCategories(): Promise<{ name: string; slug: string; cou
   const { data } = await supabase
     .from("restaurants")
     .select("primary_category")
-    .eq("listing_status", ACTIVE);
+    .in("listing_status", LISTABLE_STATUSES);
   const counts = new Map<string, number>();
   for (const row of data ?? []) {
     if (!row.primary_category) continue;
@@ -165,7 +172,10 @@ export async function getRestaurantsByCategorySlug(categorySlug: string): Promis
 }
 
 export async function getBoroughs(): Promise<{ name: string; slug: string; count: number }[]> {
-  const { data } = await supabase.from("restaurants").select("borough").eq("listing_status", ACTIVE);
+  const { data } = await supabase
+    .from("restaurants")
+    .select("borough")
+    .in("listing_status", LISTABLE_STATUSES);
   const counts = new Map<string, number>();
   for (const row of data ?? []) {
     if (!row.borough) continue;
@@ -205,7 +215,7 @@ export async function getAreas(): Promise<Area[]> {
   const { data } = await supabase
     .from("restaurants")
     .select("location_area, borough")
-    .eq("listing_status", ACTIVE);
+    .in("listing_status", LISTABLE_STATUSES);
 
   const counts = new Map<string, Area>();
   for (const row of data ?? []) {
@@ -240,7 +250,10 @@ export async function getRestaurantsByBoroughAndAreaSlug(
 }
 
 export async function getFeatures(): Promise<{ name: string; slug: string; count: number }[]> {
-  const { data } = await supabase.from("restaurants").select("attributes").eq("listing_status", ACTIVE);
+  const { data } = await supabase
+    .from("restaurants")
+    .select("attributes")
+    .in("listing_status", LISTABLE_STATUSES);
   const counts = new Map<string, number>();
   for (const row of data ?? []) {
     for (const attr of row.attributes ?? []) {
@@ -262,7 +275,7 @@ export async function getRestaurantsByFeatureSlug(featureSlug: string): Promise<
   const { data } = await supabase
     .from("restaurants")
     .select("*")
-    .eq("listing_status", ACTIVE)
+    .in("listing_status", LISTABLE_STATUSES)
     .contains("attributes", [match.name])
     .order("rating", { ascending: false });
   return { feature: match.name, restaurants: data ?? [] };
