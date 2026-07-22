@@ -95,6 +95,7 @@ export type Database = {
           location_area: string | null
           menu_link: string | null
           name: string
+          nearby_parking: Json | null
           nearby_stations: Json | null
           opening_hours: string | null
           phone: string | null
@@ -138,6 +139,7 @@ export type Database = {
           location_area?: string | null
           menu_link?: string | null
           name: string
+          nearby_parking?: Json | null
           nearby_stations?: Json | null
           opening_hours?: string | null
           phone?: string | null
@@ -181,6 +183,7 @@ export type Database = {
           location_area?: string | null
           menu_link?: string | null
           name?: string
+          nearby_parking?: Json | null
           nearby_stations?: Json | null
           opening_hours?: string | null
           phone?: string | null
