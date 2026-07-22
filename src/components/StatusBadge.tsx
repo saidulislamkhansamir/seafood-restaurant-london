@@ -18,6 +18,10 @@ export function StatusBadge({
   // the page actually wants to know. Falls back to the plain status badge
   // when hours can't be parsed, and never applies to closed statuses.
   const showLive = isActive(status) && liveStatus;
+  // Active but no live hours data — still true, but shouldn't look like a
+  // confirmed real-time claim sitting next to green "Open now" pills, so it
+  // gets a neutral color instead of green.
+  const noLiveData = isActive(status) && !liveStatus;
   const shortLabel = showLive ? (liveStatus.open ? "Open now" : "Closed now") : visual.label;
   const label =
     showLive && detailed && liveStatus.changeLabel
@@ -25,8 +29,14 @@ export function StatusBadge({
       : shortLabel;
   const badgeClasses = showLive && !liveStatus.open
     ? "bg-red-50 text-red-700 border-red-200"
+    : noLiveData
+    ? "bg-gray-50 text-gray-600 border-gray-200"
     : visual.badgeClasses;
-  const dotClasses = showLive && !liveStatus.open ? "bg-red-500" : visual.dotClasses;
+  const dotClasses = showLive && !liveStatus.open
+    ? "bg-red-500"
+    : noLiveData
+    ? "bg-gray-400"
+    : visual.dotClasses;
 
   return (
     <span
