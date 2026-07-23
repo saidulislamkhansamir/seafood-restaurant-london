@@ -1,6 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+
+// True only once we're actually running in the browser — used to keep the
+// server-rendered pass and the very first client (hydration) pass identical,
+// then flips to true right after.
+function noopSubscribe() {
+  return () => {};
+}
+function useIsMounted(): boolean {
+  return useSyncExternalStore(noopSubscribe, () => true, () => false);
+}
 
 type Network = {
   name: string;
@@ -180,7 +190,13 @@ export function ShareButton({ title }: { title: string }) {
     }
   }
 
-  const pageUrl = typeof window !== "undefined" ? window.location.href : "";
+  // Reads the real page URL once mounted and keeps it stable from then on —
+  // it can never change mid-click. Tying it to `open` instead (as this used
+  // to) meant closing the panel on click could rewrite the link's href to
+  // the SSR-safe "#" fallback before the browser had actually followed it,
+  // so the click just reopened the current page.
+  const mounted = useIsMounted();
+  const pageUrl = mounted ? window.location.href : "";
 
   return (
     <div ref={wrapperRef} className="relative">
@@ -212,7 +228,7 @@ export function ShareButton({ title }: { title: string }) {
           {NETWORKS.map(({ name, color, buildHref, Icon }) => (
             <a
               key={name}
-              href={open ? buildHref(pageUrl, title) : "#"}
+              href={buildHref(pageUrl, title)}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => setOpen(false)}
