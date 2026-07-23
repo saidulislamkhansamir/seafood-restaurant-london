@@ -52,7 +52,10 @@ function FacebookIcon({ className, color }: IconProps) {
 function XIcon({ className, color }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path d="M6 6L18 18M18 6L6 18" stroke={color} strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+        fill={color}
+      />
     </svg>
   );
 }
@@ -224,7 +227,7 @@ export function ShareButton({ title }: { title: string }) {
 
       <div
         inert={!open}
-        className={`flex items-center gap-1 overflow-hidden transition-all duration-300 ease-out ${
+        className={`flex items-center gap-1 overflow-x-clip py-1 transition-all duration-300 ease-out ${
           open ? "max-w-[420px] opacity-100" : "max-w-0 opacity-0"
         }`}
       >
