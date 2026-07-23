@@ -12,6 +12,16 @@ function useIsMounted(): boolean {
   return useSyncExternalStore(noopSubscribe, () => true, () => false);
 }
 
+// True only for browsers with the native share sheet (mainly mobile) — lets
+// us skip our own expanding icon row entirely and hand off to the OS instead.
+function useCanNativeShare(): boolean {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => typeof navigator !== "undefined" && typeof navigator.share === "function",
+    () => false
+  );
+}
+
 type IconProps = { className?: string; color: string };
 
 type Network = {
@@ -198,6 +208,7 @@ export function ShareButton({ title }: { title: string }) {
   // rewriting the href before the browser follows it.
   const mounted = useIsMounted();
   const pageUrl = mounted ? window.location.href : "";
+  const canNativeShare = useCanNativeShare();
 
   async function handleCopyLink() {
     try {
@@ -209,66 +220,82 @@ export function ShareButton({ title }: { title: string }) {
     }
   }
 
+  async function handleShareClick() {
+    if (canNativeShare) {
+      try {
+        await navigator.share({ title, url: pageUrl });
+      } catch {
+        // user cancelled the share sheet — nothing to do
+      }
+      return;
+    }
+    setOpen((v) => !v);
+  }
+
   return (
     <div className="flex flex-wrap items-center gap-2">
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
+        onClick={handleShareClick}
+        aria-expanded={canNativeShare ? undefined : open}
         className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white py-1 pl-1 pr-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-95"
       >
         <span
           className={`flex h-5 w-5 items-center justify-center rounded-full transition-colors duration-200 ${
-            open ? "bg-primary" : "bg-primary/10"
+            open && !canNativeShare ? "bg-primary" : "bg-primary/10"
           }`}
         >
-          <ShareGlyph className={open ? "text-white" : "text-primary"} />
+          <ShareGlyph className={open && !canNativeShare ? "text-white" : "text-primary"} />
         </span>
         <span className="text-xs font-semibold text-foreground">Share</span>
       </button>
 
-      {/* max-w-[85vw] caps the row to the phone screen so it wraps instead
-          of overflowing; sm:max-w-[420px] restores the wider desktop row. */}
-      <div
-        inert={!open}
-        className={`flex max-w-[85vw] flex-wrap items-center gap-1 overflow-hidden py-0.5 transition-all duration-300 ease-out sm:max-w-[420px] ${
-          open ? "max-h-24 opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <button
-          type="button"
-          onClick={handleCopyLink}
-          title={copied ? "Link copied!" : "Copy link"}
-          aria-label={copied ? "Link copied" : "Copy link"}
-          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border shadow-sm transition-all duration-200 ${
-            open ? "scale-100" : "scale-0"
-          } hover:-translate-y-0.5 hover:shadow-md active:scale-95 ${
-            copied ? "border-green-500 bg-green-500" : "bg-white text-foreground/60 hover:text-foreground"
+      {/* Browsers with a native share sheet (most mobile browsers) skip this
+          entirely — no expanding row needed once the OS sheet does the job.
+          max-w-[85vw] caps the row to the phone screen so it wraps instead of
+          overflowing; sm:max-w-[420px] restores the wider desktop row. */}
+      {!canNativeShare && (
+        <div
+          inert={!open}
+          className={`flex max-w-[85vw] flex-wrap items-center gap-1 overflow-hidden py-0.5 transition-all duration-300 ease-out sm:max-w-[420px] ${
+            open ? "max-h-24 opacity-100" : "max-h-0 opacity-0"
           }`}
         >
-          {copied ? <CheckIcon className="h-3 w-3" /> : <LinkIcon className="h-3 w-3" />}
-        </button>
-
-        {NETWORKS.map(({ name, color, buildHref, Icon }, i) => (
-          <a
-            key={name}
-            href={buildHref(pageUrl, title)}
-            target="_blank"
-            rel="noopener noreferrer"
-            title={`Share on ${name}`}
-            aria-label={`Share on ${name}`}
-            style={{
-              backgroundColor: `${color}17`,
-              transitionDelay: open ? `${(i + 1) * 40}ms` : "0ms",
-            }}
-            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full shadow-sm transition-all duration-200 ${
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            title={copied ? "Link copied!" : "Copy link"}
+            aria-label={copied ? "Link copied" : "Copy link"}
+            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border shadow-sm transition-all duration-200 ${
               open ? "scale-100" : "scale-0"
-            } hover:-translate-y-0.5 hover:shadow-md active:scale-95`}
+            } hover:-translate-y-0.5 hover:shadow-md active:scale-95 ${
+              copied ? "border-green-500 bg-green-500" : "bg-white text-foreground/60 hover:text-foreground"
+            }`}
           >
-            <Icon color={color} className="h-3 w-3" />
-          </a>
-        ))}
-      </div>
+            {copied ? <CheckIcon className="h-3 w-3" /> : <LinkIcon className="h-3 w-3" />}
+          </button>
+
+          {NETWORKS.map(({ name, color, buildHref, Icon }, i) => (
+            <a
+              key={name}
+              href={buildHref(pageUrl, title)}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`Share on ${name}`}
+              aria-label={`Share on ${name}`}
+              style={{
+                backgroundColor: `${color}17`,
+                transitionDelay: open ? `${(i + 1) * 40}ms` : "0ms",
+              }}
+              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full shadow-sm transition-all duration-200 ${
+                open ? "scale-100" : "scale-0"
+              } hover:-translate-y-0.5 hover:shadow-md active:scale-95`}
+            >
+              <Icon color={color} className="h-3 w-3" />
+            </a>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
