@@ -252,7 +252,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      claim_restaurant_photo: {
+        Args: { p_restaurant_id: string; p_storage_path: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

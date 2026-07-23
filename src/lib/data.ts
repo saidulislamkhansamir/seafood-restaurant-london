@@ -295,7 +295,24 @@ export async function submitRestaurant(input: {
   if (error) throw new Error(error.message);
 }
 
-export async function submitRestaurantPhoto(input: { restaurant_id: string; storage_path: string }) {
-  const { error } = await supabase.from("photo_submissions").insert(input);
+export async function submitRestaurantPhoto(input: {
+  restaurant_id: string;
+  storage_path: string;
+}): Promise<{ approved: boolean }> {
+  // Restaurants with no photo yet get the submitted one immediately — there's
+  // nothing to protect by holding it back. One that already has a photo goes
+  // to the pending queue instead, since a live photo shouldn't be silently
+  // replaced without a look.
+  const { data: claimed, error: claimError } = await supabase.rpc("claim_restaurant_photo", {
+    p_restaurant_id: input.restaurant_id,
+    p_storage_path: input.storage_path,
+  });
+  if (claimError) throw new Error(claimError.message);
+
+  const { error } = await supabase
+    .from("photo_submissions")
+    .insert({ ...input, status: claimed ? "approved" : "pending" });
   if (error) throw new Error(error.message);
+
+  return { approved: Boolean(claimed) };
 }

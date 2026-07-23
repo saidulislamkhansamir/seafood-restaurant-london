@@ -21,7 +21,7 @@ export function SuggestPhotoForm({ restaurantId }: { restaurantId: string }) {
         onClick={() => setOpen(true)}
         className="mt-6 text-sm font-semibold text-primary hover:text-primary-dark"
       >
-        📷 Have a photo of this place? Suggest it →
+        📷 Are you the owner, or have a photo of this place? Add it →
       </button>
     );
   }

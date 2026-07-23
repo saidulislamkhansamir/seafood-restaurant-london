@@ -16,8 +16,13 @@ export async function suggestPhotoAction(
   }
 
   try {
-    await submitRestaurantPhoto({ restaurant_id, storage_path });
-    return { status: "success", message: "Thanks! We'll review your photo and add it soon." };
+    const { approved } = await submitRestaurantPhoto({ restaurant_id, storage_path });
+    return {
+      status: "success",
+      message: approved
+        ? "Thanks! Your photo is now live on this page."
+        : "Thanks! We'll review your photo and add it soon.",
+    };
   } catch {
     return { status: "error", message: "Something went wrong submitting your photo. Please try again." };
   }
