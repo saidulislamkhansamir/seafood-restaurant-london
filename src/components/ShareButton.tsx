@@ -258,13 +258,18 @@ export function ShareButton({ title }: { title: string }) {
 
       {/* Browsers with a native share sheet (most mobile browsers) skip this
           entirely — no expanding row needed once the OS sheet does the job.
-          max-w-[85vw] caps the row to the phone screen so it wraps instead of
-          overflowing; sm:max-w-[420px] restores the wider desktop row. */}
+          Width is capped to 0 while closed (not just height) so this row
+          claims no layout space before it's opened — otherwise, on the very
+          first paint before hydration knows about native share support, the
+          "closed" row still claims its full width and can force Share onto
+          its own line for a moment. max-w-[85vw] caps the open row to the
+          phone screen so it wraps instead of overflowing; sm:max-w-[420px]
+          restores the wider desktop row. */}
       {!canNativeShare && (
         <div
           inert={!open}
-          className={`flex max-w-[85vw] flex-wrap items-center gap-1 overflow-hidden py-0.5 transition-all duration-300 ease-out sm:max-w-[420px] ${
-            open ? "max-h-24 opacity-100" : "max-h-0 opacity-0"
+          className={`flex flex-wrap items-center gap-1 overflow-hidden py-0.5 transition-all duration-300 ease-out ${
+            open ? "max-w-[85vw] max-h-24 opacity-100 sm:max-w-[420px]" : "max-w-0 max-h-0 opacity-0"
           }`}
         >
           <button
