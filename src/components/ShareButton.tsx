@@ -210,14 +210,16 @@ export function ShareButton({ title }: { title: string }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors ${
-          open
-            ? "border-primary bg-primary/5 text-primary"
-            : "border-border bg-white text-foreground hover:border-primary"
-        }`}
+        className="inline-flex items-center gap-2 rounded-full border border-border bg-white py-1.5 pl-1.5 pr-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-95"
       >
-        <ShareGlyph />
-        Share
+        <span
+          className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-200 ${
+            open ? "bg-primary" : "bg-primary/10"
+          }`}
+        >
+          <ShareGlyph className={open ? "text-white" : "text-primary"} />
+        </span>
+        <span className="text-sm font-semibold text-foreground">Share</span>
       </button>
 
       <div
