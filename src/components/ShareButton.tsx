@@ -52,10 +52,12 @@ function FacebookIcon({ className, color }: IconProps) {
 function XIcon({ className, color }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
-      <path
-        d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
-        fill={color}
-      />
+      <g transform="translate(12 12) scale(0.78) translate(-12 -12)">
+        <path
+          d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"
+          fill={color}
+        />
+      </g>
     </svg>
   );
 }
@@ -208,7 +210,7 @@ export function ShareButton({ title }: { title: string }) {
   }
 
   return (
-    <div className="inline-flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-2">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -225,10 +227,12 @@ export function ShareButton({ title }: { title: string }) {
         <span className="text-xs font-semibold text-foreground">Share</span>
       </button>
 
+      {/* w-full + flex-wrap: on a narrow phone the row wraps onto a second
+          line instead of overflowing past the screen edge. */}
       <div
         inert={!open}
-        className={`flex items-center gap-1 overflow-x-clip py-1 transition-all duration-300 ease-out ${
-          open ? "max-w-[420px] opacity-100" : "max-w-0 opacity-0"
+        className={`flex w-full flex-wrap items-center gap-1 overflow-hidden py-1 transition-all duration-300 ease-out ${
+          open ? "max-h-24 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <button
