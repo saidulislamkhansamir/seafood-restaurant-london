@@ -37,14 +37,22 @@ export function SaveButton({
     if (nowSaved) setPulseKey((k) => k + 1);
   }
 
+  // The chip (label) variant's circle backdrop itself flips color (pale <->
+  // solid red), so the heart just needs to contrast with that. The icon-only
+  // card overlay always sits on a plain white circle, so the heart alone
+  // must carry the saved/unsaved state: solid red when saved, hollow red
+  // outline when not — a white heart there would be invisible on white.
+  const heartFill = label ? (saved ? "white" : "#e11d48") : saved ? "#e11d48" : "white";
+  const heartStroke = label ? (saved ? "white" : "#e11d48") : "#e11d48";
+
   const heart = (
     <svg
       key={pulseKey}
       width="12"
       height="12"
       viewBox="0 0 20 20"
-      fill={saved ? "white" : "#e11d48"}
-      stroke={saved ? "white" : "#e11d48"}
+      fill={heartFill}
+      stroke={heartStroke}
       strokeWidth="1.6"
       className={pulseKey > 0 ? "animate-pop" : ""}
       aria-hidden="true"
