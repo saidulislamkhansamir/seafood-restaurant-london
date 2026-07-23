@@ -31,6 +31,7 @@ type RestaurantFilters = {
   borough?: string;
   area?: string;
   q?: string;
+  price?: string;
 };
 
 export async function getAllRestaurants(filters?: RestaurantFilters): Promise<Restaurant[]> {
@@ -39,6 +40,7 @@ export async function getAllRestaurants(filters?: RestaurantFilters): Promise<Re
   if (filters?.category) query = query.ilike("primary_category", filters.category);
   if (filters?.borough) query = query.ilike("borough", filters.borough);
   if (filters?.area) query = query.ilike("location_area", filters.area);
+  if (filters?.price) query = query.eq("price_range", filters.price);
   if (filters?.q) {
     query = query.or(
       `name.ilike.%${filters.q}%,description.ilike.%${filters.q}%,location_area.ilike.%${filters.q}%`
@@ -62,6 +64,7 @@ export async function getRestaurantsPage(
   if (filters?.category) query = query.ilike("primary_category", filters.category);
   if (filters?.borough) query = query.ilike("borough", filters.borough);
   if (filters?.area) query = query.ilike("location_area", filters.area);
+  if (filters?.price) query = query.eq("price_range", filters.price);
   if (filters?.q) {
     query = query.or(
       `name.ilike.%${filters.q}%,description.ilike.%${filters.q}%,location_area.ilike.%${filters.q}%`
@@ -85,6 +88,18 @@ export async function getRestaurantBySlug(slug: string): Promise<Restaurant | nu
     .neq("listing_status", NOT_A_RESTAURANT)
     .maybeSingle();
   return data;
+}
+
+export async function getRestaurantsByIds(ids: string[]): Promise<Restaurant[]> {
+  if (ids.length === 0) return [];
+  const { data } = await supabase
+    .from("restaurants")
+    .select("*")
+    .in("id", ids)
+    .neq("listing_status", NOT_A_RESTAURANT);
+  const byId = new Map((data ?? []).map((r) => [r.id, r]));
+  // Preserve the caller's order (e.g. the order restaurants were added to compare).
+  return ids.map((id) => byId.get(id)).filter((r): r is Restaurant => Boolean(r));
 }
 
 export async function getRelatedRestaurants(restaurant: Restaurant, limit = 6): Promise<Restaurant[]> {

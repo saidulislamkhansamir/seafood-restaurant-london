@@ -7,6 +7,7 @@ import { getFeaturedRestaurants, getCategories, getBoroughs, getRestaurantsCount
 import { categoryIcon, categoryTint } from "@/lib/category-icon";
 import { POSTS } from "@/lib/posts";
 import { faqJsonLd } from "@/lib/seo";
+import { RecentlyViewedStrip } from "@/components/RecentlyViewedStrip";
 
 export const revalidate = 3600;
 
@@ -100,6 +101,8 @@ export default async function HomePage() {
           </Link>
         </Container>
       </section>
+
+      <RecentlyViewedStrip />
 
       <section className="py-16 bg-muted sm:py-20">
         <Container className="max-w-3xl">

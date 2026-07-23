@@ -4,11 +4,19 @@ import type { Restaurant } from "@/lib/data";
 import { StarRating } from "./StarRating";
 import { StatusBadge } from "./StatusBadge";
 import { SaveButton } from "./SaveButton";
+import { CompareButton } from "./CompareButton";
 import { categoryGradient } from "@/lib/category-icon";
 import { getLiveStatus } from "@/lib/opening-hours";
 import { isActive } from "@/lib/restaurant-status";
+import { formatDistance } from "@/lib/geo";
 
-export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
+export function RestaurantCard({
+  restaurant,
+  distanceMiles,
+}: {
+  restaurant: Restaurant;
+  distanceMiles?: number;
+}) {
   const liveStatus = isActive(restaurant.listing_status)
     ? getLiveStatus(restaurant.opening_hours)
     : null;
@@ -69,9 +77,10 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
         <p className="text-sm text-foreground/60">
           {restaurant.primary_category}
           {restaurant.location_area ? ` · ${restaurant.location_area}` : ""}
+          {distanceMiles != null ? ` · ${formatDistance(distanceMiles)}` : ""}
         </p>
         {restaurant.cuisine_tags && restaurant.cuisine_tags.length > 0 ? (
-          <div className="mt-auto flex flex-wrap gap-1.5 pt-2">
+          <div className="flex flex-wrap gap-1.5 pt-2">
             {restaurant.cuisine_tags.slice(0, 3).map((tag) => (
               <span key={tag} className="rounded-full bg-muted px-2.5 py-1 text-xs text-foreground/70">
                 {tag}
@@ -79,6 +88,9 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
             ))}
           </div>
         ) : null}
+        <div className="mt-auto flex justify-end pt-2">
+          <CompareButton restaurantId={restaurant.id} />
+        </div>
       </div>
     </Link>
   );

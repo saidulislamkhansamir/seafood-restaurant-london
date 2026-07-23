@@ -17,6 +17,7 @@ import { PhotoGallery } from "@/components/PhotoGallery";
 import { WriteReviewForm } from "@/components/WriteReviewForm";
 import { ClaimListingForm } from "@/components/ClaimListingForm";
 import { MemberDiscountCard } from "@/components/MemberDiscountCard";
+import { TrackRecentlyViewed } from "@/components/TrackRecentlyViewed";
 import { categoryGradient } from "@/lib/category-icon";
 import { getRestaurantBySlug, getRelatedRestaurants, getRestaurantPhotos, getRestaurantReviews } from "@/lib/data";
 import { slugify } from "@/lib/utils";
@@ -102,6 +103,19 @@ export default async function RestaurantPage({ params }: Props) {
 
   return (
     <>
+      <TrackRecentlyViewed
+        entry={{
+          id: restaurant.id,
+          slug: restaurant.slug,
+          name: restaurant.name,
+          photo_url: restaurant.photo_url,
+          primary_category: restaurant.primary_category,
+          location_area: restaurant.location_area,
+          price_range: restaurant.price_range,
+          rating: restaurant.rating,
+          review_count: restaurant.review_count,
+        }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

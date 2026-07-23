@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
+import { CompareBar } from "@/components/CompareBar";
 import { SITE_IS_LIVE, SITE_URL } from "@/lib/site-config";
 
 const siteUrl = SITE_URL;
@@ -64,6 +65,7 @@ export default function RootLayout({
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
+        <CompareBar />
       </body>
     </html>
   );

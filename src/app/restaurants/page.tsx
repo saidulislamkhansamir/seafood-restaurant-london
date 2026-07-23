@@ -4,16 +4,31 @@ import { Container } from "@/components/Container";
 import { SearchBar } from "@/components/SearchBar";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { Pagination } from "@/components/Pagination";
-import { getRestaurantsPage, getAllRestaurants, getCategories, getBoroughs } from "@/lib/data";
+import { NearMeButton } from "@/components/NearMeButton";
+import { RestaurantsMap } from "@/components/RestaurantsMap";
+import { getRestaurantsPage, getAllRestaurants, getCategories, getBoroughs, type Restaurant } from "@/lib/data";
 import { faqJsonLd } from "@/lib/seo";
 import { getLiveStatus } from "@/lib/opening-hours";
 import { isActive } from "@/lib/restaurant-status";
+import { distanceMiles } from "@/lib/geo";
 
 export const revalidate = 3600;
 
 const PAGE_SIZE = 24;
+const PRICES = ["£", "££", "£££", "££££"];
 
-type SearchParams = { q?: string; category?: string; borough?: string; page?: string; open?: string };
+type SearchParams = {
+  q?: string;
+  category?: string;
+  borough?: string;
+  page?: string;
+  open?: string;
+  price?: string;
+  lat?: string;
+  lng?: string;
+  sort?: string;
+  view?: string;
+};
 
 export async function generateMetadata({
   searchParams,
@@ -21,7 +36,7 @@ export async function generateMetadata({
   searchParams: Promise<SearchParams>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const hasFilters = Boolean(params.q || params.category || params.borough);
+  const hasFilters = Boolean(params.q || params.category || params.borough || params.price);
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
   const canonical = hasFilters || page <= 1 ? "/restaurants" : `/restaurants?page=${page}`;
   return {
@@ -39,38 +54,79 @@ export default async function RestaurantsPage({
   const params = await searchParams;
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
   const openOnly = params.open === "true";
-  const hasFilters = Boolean(params.q || params.category || params.borough || openOnly);
-  const showEditorial = !hasFilters && page === 1;
-  const filters = { q: params.q, category: params.category, borough: params.borough };
+  const mapView = params.view === "map";
+  const lat = params.lat ? Number.parseFloat(params.lat) : null;
+  const lng = params.lng ? Number.parseFloat(params.lng) : null;
+  const sortByDistance = params.sort === "distance" && lat != null && lng != null && !Number.isNaN(lat) && !Number.isNaN(lng);
+  const hasFilters = Boolean(params.q || params.category || params.borough || params.price || openOnly);
+  const showEditorial = !hasFilters && page === 1 && !sortByDistance;
+  const filters = { q: params.q, category: params.category, borough: params.borough, price: params.price };
+
+  // "Open now" and "near me" both need every matching row up front (the
+  // former depends on the current time, the latter on distance from the
+  // visitor) — neither can be filtered/sorted at the database level, so
+  // fetch-all-then-filter-in-memory-then-paginate is used for both. The
+  // normal path still uses efficient DB-level pagination.
+  const needsAll = openOnly || sortByDistance || mapView;
 
   const [pageResult, categories, boroughs] = await Promise.all([
-    // "Open now" isn't a stored column (it depends on the current time), so
-    // it can't be filtered at the database level — fetch every matching
-    // restaurant, filter by live status, then paginate the filtered list in
-    // memory. Only paid for when this filter is actually on; the normal
-    // path still uses efficient DB-level pagination.
-    openOnly ? getAllRestaurants(filters) : getRestaurantsPage(filters, page, PAGE_SIZE),
+    needsAll ? getAllRestaurants(filters) : getRestaurantsPage(filters, page, PAGE_SIZE),
     getCategories(),
     getBoroughs(),
   ]);
 
-  let restaurants: Awaited<ReturnType<typeof getAllRestaurants>>;
+  let restaurants: Restaurant[];
   let total: number;
   let pageSize: number;
-  if (openOnly) {
-    const allOpenNow = (pageResult as Awaited<ReturnType<typeof getAllRestaurants>>).filter(
-      (r) => isActive(r.listing_status) && getLiveStatus(r.opening_hours)?.open
-    );
-    total = allOpenNow.length;
-    pageSize = PAGE_SIZE;
-    restaurants = allOpenNow.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  let distanceById: Map<string, number> | null = null;
+
+  if (needsAll) {
+    let list = pageResult as Restaurant[];
+    if (openOnly) {
+      list = list.filter((r) => isActive(r.listing_status) && getLiveStatus(r.opening_hours)?.open);
+    }
+    if (sortByDistance && lat != null && lng != null) {
+      distanceById = new Map(
+        list
+          .filter((r) => r.lat != null && r.lng != null)
+          .map((r) => [r.id, distanceMiles(lat, lng, r.lat!, r.lng!)])
+      );
+      list = [...list].sort((a, b) => {
+        const da = distanceById!.get(a.id) ?? Infinity;
+        const db = distanceById!.get(b.id) ?? Infinity;
+        return da - db;
+      });
+    }
+    total = list.length;
+    pageSize = mapView ? total || 1 : PAGE_SIZE;
+    restaurants = mapView ? list : list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   } else {
     const paged = pageResult as Awaited<ReturnType<typeof getRestaurantsPage>>;
     restaurants = paged.restaurants;
     total = paged.total;
     pageSize = paged.pageSize;
   }
-  const totalPages = Math.ceil(total / pageSize);
+  const totalPages = mapView ? 1 : Math.ceil(total / pageSize);
+
+  function withParams(overrides: Record<string, string | undefined>): string {
+    const qs = new URLSearchParams();
+    if (params.q) qs.set("q", params.q);
+    if (params.category) qs.set("category", params.category);
+    if (params.borough) qs.set("borough", params.borough);
+    if (params.price) qs.set("price", params.price);
+    if (openOnly) qs.set("open", "true");
+    if (sortByDistance && lat != null && lng != null) {
+      qs.set("lat", String(lat));
+      qs.set("lng", String(lng));
+      qs.set("sort", "distance");
+    }
+    for (const [key, value] of Object.entries(overrides)) {
+      if (value === undefined) qs.delete(key);
+      else qs.set(key, value);
+    }
+    const s = qs.toString();
+    return `/restaurants${s ? `?${s}` : ""}`;
+  }
 
   const faqs = [
     {
@@ -104,7 +160,8 @@ export default async function RestaurantsPage({
       ) : null}
       <h1 className="text-3xl font-bold">All Restaurants</h1>
       <p className="mt-2 text-foreground/60">
-        {total} restaurant{total === 1 ? "" : "s"} {openOnly ? "open right now" : "found"}
+        {total} restaurant{total === 1 ? "" : "s"}{" "}
+        {openOnly ? "open right now" : sortByDistance ? "found, nearest first" : "found"}
       </p>
       {showEditorial ? (
         <p className="mt-4 text-foreground/70 leading-relaxed">
@@ -119,17 +176,9 @@ export default async function RestaurantsPage({
         <SearchBar initialQuery={params.q} initialCategory={params.category} initialBorough={params.borough} />
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <Link
-          href={(() => {
-            const qs = new URLSearchParams();
-            if (params.q) qs.set("q", params.q);
-            if (params.category) qs.set("category", params.category);
-            if (params.borough) qs.set("borough", params.borough);
-            if (!openOnly) qs.set("open", "true");
-            const s = qs.toString();
-            return `/restaurants${s ? `?${s}` : ""}`;
-          })()}
+          href={withParams({ open: openOnly ? undefined : "true", page: undefined })}
           className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
             openOnly
               ? "border-primary bg-primary text-white"
@@ -138,6 +187,33 @@ export default async function RestaurantsPage({
         >
           <span className={`h-1.5 w-1.5 rounded-full ${openOnly ? "bg-white" : "bg-green-500"}`} aria-hidden />
           {openOnly ? "Showing open now — clear" : "Show only open now"}
+        </Link>
+
+        {PRICES.map((price) => (
+          <Link
+            key={price}
+            href={withParams({ price: params.price === price ? undefined : price, page: undefined })}
+            className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+              params.price === price
+                ? "border-primary bg-primary text-white"
+                : "border-border bg-white text-foreground/70 hover:border-primary hover:text-primary"
+            }`}
+          >
+            {price}
+          </Link>
+        ))}
+
+        <NearMeButton active={sortByDistance} />
+
+        <Link
+          href={withParams({ view: mapView ? undefined : "map", page: undefined })}
+          className={`ml-auto inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+            mapView
+              ? "border-primary bg-primary text-white"
+              : "border-border bg-white text-foreground/70 hover:border-primary hover:text-primary"
+          }`}
+        >
+          {mapView ? "☰ List view" : "🗺️ Map view"}
         </Link>
       </div>
 
@@ -172,14 +248,20 @@ export default async function RestaurantsPage({
       </div>
 
       {restaurants.length > 0 ? (
-        <>
-          <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {restaurants.map((r) => (
-              <RestaurantCard key={r.id} restaurant={r} />
-            ))}
+        mapView ? (
+          <div className="mt-10">
+            <RestaurantsMap restaurants={restaurants} />
           </div>
-          <Pagination page={page} totalPages={totalPages} searchParams={params} />
-        </>
+        ) : (
+          <>
+            <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {restaurants.map((r) => (
+                <RestaurantCard key={r.id} restaurant={r} distanceMiles={distanceById?.get(r.id)} />
+              ))}
+            </div>
+            <Pagination page={page} totalPages={totalPages} searchParams={params} />
+          </>
+        )
       ) : (
         <p className="mt-10 text-foreground/60">No restaurants match that search yet. Try a different term.</p>
       )}
