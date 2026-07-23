@@ -231,7 +231,7 @@ export function ShareButton({ title }: { title: string }) {
           of overflowing; sm:max-w-[420px] restores the wider desktop row. */}
       <div
         inert={!open}
-        className={`flex max-w-[85vw] flex-wrap items-center gap-1 overflow-hidden py-1 transition-all duration-300 ease-out sm:max-w-[420px] ${
+        className={`flex max-w-[85vw] flex-wrap items-center gap-1 overflow-hidden py-0.5 transition-all duration-300 ease-out sm:max-w-[420px] ${
           open ? "max-h-24 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
@@ -240,13 +240,13 @@ export function ShareButton({ title }: { title: string }) {
           onClick={handleCopyLink}
           title={copied ? "Link copied!" : "Copy link"}
           aria-label={copied ? "Link copied" : "Copy link"}
-          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border shadow-sm transition-all duration-200 ${
+          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-border shadow-sm transition-all duration-200 ${
             open ? "scale-100" : "scale-0"
           } hover:-translate-y-0.5 hover:shadow-md active:scale-95 ${
             copied ? "border-green-500 bg-green-500" : "bg-white text-foreground/60 hover:text-foreground"
           }`}
         >
-          {copied ? <CheckIcon className="h-3.5 w-3.5" /> : <LinkIcon className="h-3.5 w-3.5" />}
+          {copied ? <CheckIcon className="h-3 w-3" /> : <LinkIcon className="h-3 w-3" />}
         </button>
 
         {NETWORKS.map(({ name, color, buildHref, Icon }, i) => (
@@ -261,11 +261,11 @@ export function ShareButton({ title }: { title: string }) {
               backgroundColor: `${color}17`,
               transitionDelay: open ? `${(i + 1) * 40}ms` : "0ms",
             }}
-            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full shadow-sm transition-all duration-200 ${
+            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full shadow-sm transition-all duration-200 ${
               open ? "scale-100" : "scale-0"
             } hover:-translate-y-0.5 hover:shadow-md active:scale-95`}
           >
-            <Icon color={color} className="h-3.5 w-3.5" />
+            <Icon color={color} className="h-3 w-3" />
           </a>
         ))}
       </div>
