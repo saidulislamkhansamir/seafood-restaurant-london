@@ -12,12 +12,18 @@ function useIsMounted(): boolean {
   return useSyncExternalStore(noopSubscribe, () => true, () => false);
 }
 
-// True only for browsers with the native share sheet (mainly mobile) — lets
-// us skip our own expanding icon row entirely and hand off to the OS instead.
+// True only on touch devices with a native share sheet. Some desktop
+// browsers (e.g. Chrome/Edge on Windows) also expose navigator.share, so we
+// gate on a coarse (touch) pointer too — PCs should always keep the custom
+// icon row, even on those browsers.
 function useCanNativeShare(): boolean {
   return useSyncExternalStore(
     noopSubscribe,
-    () => typeof navigator !== "undefined" && typeof navigator.share === "function",
+    () => {
+      if (typeof navigator === "undefined" || typeof navigator.share !== "function") return false;
+      if (typeof window === "undefined" || typeof window.matchMedia !== "function") return false;
+      return window.matchMedia("(pointer: coarse)").matches;
+    },
     () => false
   );
 }
