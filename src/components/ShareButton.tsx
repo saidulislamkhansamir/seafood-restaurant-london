@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 // True only once we're actually running in the browser — used to keep the
 // server-rendered pass and the very first client (hydration) pass identical,
@@ -116,6 +116,14 @@ function LinkIcon({ className }: { className?: string }) {
   );
 }
 
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden="true">
+      <path d="M5 12.5 10 17l9-10" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 const NETWORKS: Network[] = [
   {
     name: "WhatsApp",
@@ -165,95 +173,53 @@ const NETWORKS: Network[] = [
 ];
 
 export function ShareButton({ title }: { title: string }) {
-  const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    function handleOutsideClick(e: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, [open]);
+  // Reads the real page URL once mounted and keeps it stable from then on —
+  // server snapshot is always "", so there's no hydration mismatch.
+  const mounted = useIsMounted();
+  const pageUrl = mounted ? window.location.href : "";
 
   async function handleCopyLink() {
     try {
       await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setTimeout(() => setCopied(false), 1500);
     } catch {
       // clipboard blocked — nothing more we can do without a server round trip
     }
   }
 
-  // Reads the real page URL once mounted and keeps it stable from then on —
-  // it can never change mid-click. Tying it to `open` instead (as this used
-  // to) meant closing the panel on click could rewrite the link's href to
-  // the SSR-safe "#" fallback before the browser had actually followed it,
-  // so the click just reopened the current page.
-  const mounted = useIsMounted();
-  const pageUrl = mounted ? window.location.href : "";
-
   return (
-    <div ref={wrapperRef} className="relative">
+    <div className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 py-1.5 pl-3 pr-1.5">
+      <span className="text-xs font-semibold uppercase tracking-wide text-foreground/40">Share</span>
+
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
-        aria-expanded={open}
-        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white px-3 py-1.5 text-sm font-semibold text-foreground hover:border-primary transition-colors"
-      >
-        <svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-          <circle cx="15" cy="4.5" r="2.2" stroke="currentColor" strokeWidth="1.5" />
-          <circle cx="5" cy="10" r="2.2" stroke="currentColor" strokeWidth="1.5" />
-          <circle cx="15" cy="15.5" r="2.2" stroke="currentColor" strokeWidth="1.5" />
-          <path d="M6.9 8.8L13 5.5M6.9 11.2L13 14.5" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
-        Share
-      </button>
-
-      <div
-        inert={!open}
-        className={`absolute left-0 top-full z-20 mt-2 w-64 origin-top-left rounded-2xl border border-border bg-white p-4 shadow-xl transition-all duration-150 ease-out ${
-          open ? "scale-100 opacity-100" : "pointer-events-none scale-95 opacity-0"
+        onClick={handleCopyLink}
+        title={copied ? "Link copied!" : "Copy link"}
+        aria-label={copied ? "Link copied" : "Copy link"}
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full shadow-sm transition-all duration-150 hover:scale-110 hover:shadow-md active:scale-95 ${
+          copied ? "bg-green-500" : "bg-white text-foreground/60 hover:text-foreground"
         }`}
       >
-        <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-foreground/40">
-          Share this restaurant
-        </p>
-        <div className="grid grid-cols-4 gap-3">
-          {NETWORKS.map(({ name, color, buildHref, Icon }) => (
-            <a
-              key={name}
-              href={buildHref(pageUrl, title)}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => setOpen(false)}
-              className="group flex flex-col items-center gap-1"
-            >
-              <span
-                style={{ backgroundColor: color }}
-                className="flex h-11 w-11 items-center justify-center rounded-full shadow-sm transition-transform group-hover:scale-110"
-              >
-                <Icon className="h-5 w-5" />
-              </span>
-              <span className="text-center text-[11px] leading-tight text-foreground/70">{name}</span>
-            </a>
-          ))}
-        </div>
+        {copied ? <CheckIcon className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
+      </button>
 
-        <button
-          type="button"
-          onClick={handleCopyLink}
-          className="mt-4 flex w-full items-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
+      {NETWORKS.map(({ name, color, buildHref, Icon }) => (
+        <a
+          key={name}
+          href={buildHref(pageUrl, title)}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={`Share on ${name}`}
+          aria-label={`Share on ${name}`}
+          style={{ backgroundColor: color }}
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full shadow-sm transition-all duration-150 hover:scale-110 hover:shadow-md active:scale-95"
         >
-          <LinkIcon className="h-4 w-4 text-foreground/60" />
-          {copied ? "Link copied!" : "Copy Link"}
-        </button>
-      </div>
+          <Icon className="h-4 w-4" />
+        </a>
+      ))}
     </div>
   );
 }
