@@ -204,11 +204,8 @@ export default async function RestaurantPage({ params }: Props) {
               </div>
             ) : null}
 
-            <NearbyStations data={restaurant.nearby_stations} />
-            <NearbyParking data={restaurant.nearby_parking} />
-
             {links.length > 0 ? (
-              <div className="flex flex-col gap-2">
+              <div className="mb-6 flex flex-col gap-2">
                 {links.map((link) => (
                   <a
                     key={link.label + link.href}
@@ -223,42 +220,48 @@ export default async function RestaurantPage({ params }: Props) {
               </div>
             ) : null}
 
-            <dl className="mt-6 space-y-4 text-sm">
-              {restaurant.full_address ? (
-                <div>
-                  <dt className="font-semibold text-foreground/50">Address</dt>
-                  <dd className="mt-1">{restaurant.full_address}</dd>
-                </div>
-              ) : null}
-              {restaurant.phone ? (
-                <div>
-                  <dt className="font-semibold text-foreground/50">Phone</dt>
-                  <dd className="mt-1">
-                    <a href={`tel:${restaurant.phone}`} className="hover:text-primary">
-                      {restaurant.phone}
-                    </a>
-                  </dd>
-                </div>
-              ) : null}
-              {restaurant.opening_hours ? (
-                <div>
-                  <dt className="font-semibold text-foreground/50">Opening Hours</dt>
-                  <dd className="mt-1 whitespace-pre-line">{restaurant.opening_hours.replace(/\s\|\s/g, "\n")}</dd>
-                </div>
-              ) : null}
-              {restaurant.google_maps_url ? (
-                <div>
-                  <a
-                    href={restaurant.google_maps_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-semibold text-primary hover:text-primary-dark"
-                  >
-                    View on Google Maps →
-                  </a>
-                </div>
-              ) : null}
-            </dl>
+            {restaurant.full_address || restaurant.phone || restaurant.opening_hours ? (
+              <dl className="mb-6 space-y-4 text-sm">
+                {restaurant.full_address ? (
+                  <div>
+                    <dt className="font-semibold text-foreground/50">Address</dt>
+                    <dd className="mt-1">{restaurant.full_address}</dd>
+                  </div>
+                ) : null}
+                {restaurant.phone ? (
+                  <div>
+                    <dt className="font-semibold text-foreground/50">Phone</dt>
+                    <dd className="mt-1">
+                      <a href={`tel:${restaurant.phone}`} className="hover:text-primary">
+                        {restaurant.phone}
+                      </a>
+                    </dd>
+                  </div>
+                ) : null}
+                {restaurant.opening_hours ? (
+                  <div>
+                    <dt className="font-semibold text-foreground/50">Opening Hours</dt>
+                    <dd className="mt-1 whitespace-pre-line">{restaurant.opening_hours.replace(/\s\|\s/g, "\n")}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            ) : null}
+
+            <NearbyStations data={restaurant.nearby_stations} />
+            <NearbyParking data={restaurant.nearby_parking} />
+
+            {restaurant.google_maps_url ? (
+              <div className="mb-6">
+                <a
+                  href={restaurant.google_maps_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-semibold text-primary hover:text-primary-dark"
+                >
+                  View on Google Maps →
+                </a>
+              </div>
+            ) : null}
 
             {!restaurant.photo_url ? <SuggestPhotoForm restaurantId={restaurant.id} /> : null}
           </aside>
