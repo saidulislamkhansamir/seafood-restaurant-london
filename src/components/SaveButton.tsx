@@ -40,8 +40,8 @@ export function SaveButton({
   const heart = (
     <svg
       key={pulseKey}
-      width="14"
-      height="14"
+      width="12"
+      height="12"
       viewBox="0 0 20 20"
       fill={saved ? "white" : "#e11d48"}
       stroke={saved ? "white" : "#e11d48"}
@@ -73,16 +73,16 @@ export function SaveButton({
       onClick={handleClick}
       aria-label={saved ? "Remove from saved" : "Save this restaurant"}
       aria-pressed={saved}
-      className={`inline-flex items-center gap-2 rounded-full border border-border bg-white py-1.5 pl-1.5 pr-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-95 ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border border-border bg-white py-1 pl-1 pr-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-95 ${className}`}
     >
       <span
-        className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-200 ${
+        className={`flex h-5 w-5 items-center justify-center rounded-full transition-colors duration-200 ${
           saved ? "bg-red-500" : "bg-red-50"
         }`}
       >
         {heart}
       </span>
-      <span className="text-sm font-semibold text-foreground">{saved ? "Saved" : "Save"}</span>
+      <span className="text-xs font-semibold text-foreground">{saved ? "Saved" : "Save"}</span>
     </button>
   );
 }

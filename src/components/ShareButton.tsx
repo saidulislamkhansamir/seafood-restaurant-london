@@ -126,7 +126,7 @@ function CheckIcon({ className }: { className?: string }) {
 
 function ShareGlyph({ className }: { className?: string }) {
   return (
-    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
+    <svg width="13" height="13" viewBox="0 0 20 20" fill="none" className={className} aria-hidden="true">
       <circle cx="15" cy="4.5" r="2.2" stroke="currentColor" strokeWidth="1.5" />
       <circle cx="5" cy="10" r="2.2" stroke="currentColor" strokeWidth="1.5" />
       <circle cx="15" cy="15.5" r="2.2" stroke="currentColor" strokeWidth="1.5" />
@@ -210,21 +210,21 @@ export function ShareButton({ title }: { title: string }) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="inline-flex items-center gap-2 rounded-full border border-border bg-white py-1.5 pl-1.5 pr-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-95"
+        className="inline-flex items-center gap-1.5 rounded-full border border-border bg-white py-1 pl-1 pr-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-95"
       >
         <span
-          className={`flex h-7 w-7 items-center justify-center rounded-full transition-colors duration-200 ${
+          className={`flex h-5 w-5 items-center justify-center rounded-full transition-colors duration-200 ${
             open ? "bg-primary" : "bg-primary/10"
           }`}
         >
           <ShareGlyph className={open ? "text-white" : "text-primary"} />
         </span>
-        <span className="text-sm font-semibold text-foreground">Share</span>
+        <span className="text-xs font-semibold text-foreground">Share</span>
       </button>
 
       <div
         inert={!open}
-        className={`flex items-center gap-1.5 overflow-hidden transition-all duration-300 ease-out ${
+        className={`flex items-center gap-1 overflow-hidden transition-all duration-300 ease-out ${
           open ? "max-w-[420px] opacity-100" : "max-w-0 opacity-0"
         }`}
       >
@@ -233,13 +233,13 @@ export function ShareButton({ title }: { title: string }) {
           onClick={handleCopyLink}
           title={copied ? "Link copied!" : "Copy link"}
           aria-label={copied ? "Link copied" : "Copy link"}
-          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border shadow-sm transition-all duration-200 ${
+          className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border shadow-sm transition-all duration-200 ${
             open ? "scale-100" : "scale-0"
           } hover:-translate-y-0.5 hover:shadow-md active:scale-95 ${
             copied ? "border-green-500 bg-green-500" : "bg-white text-foreground/60 hover:text-foreground"
           }`}
         >
-          {copied ? <CheckIcon className="h-4 w-4" /> : <LinkIcon className="h-4 w-4" />}
+          {copied ? <CheckIcon className="h-3.5 w-3.5" /> : <LinkIcon className="h-3.5 w-3.5" />}
         </button>
 
         {NETWORKS.map(({ name, color, buildHref, Icon }, i) => (
@@ -254,11 +254,11 @@ export function ShareButton({ title }: { title: string }) {
               backgroundColor: `${color}17`,
               transitionDelay: open ? `${(i + 1) * 40}ms` : "0ms",
             }}
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full shadow-sm transition-all duration-200 ${
+            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full shadow-sm transition-all duration-200 ${
               open ? "scale-100" : "scale-0"
             } hover:-translate-y-0.5 hover:shadow-md active:scale-95`}
           >
-            <Icon color={color} className="h-4 w-4" />
+            <Icon color={color} className="h-3.5 w-3.5" />
           </a>
         ))}
       </div>
