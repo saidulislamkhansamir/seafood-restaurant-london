@@ -38,6 +38,11 @@ export function getAuthSnapshot(): AuthState {
   return state;
 }
 
+// A single cached object, not a new literal per call — useSyncExternalStore
+// requires the server snapshot to be referentially stable across calls, or
+// React treats every render as a change and warns of a possible infinite loop.
+const SERVER_SNAPSHOT: AuthState = { status: "loading", user: null };
+
 export function getServerAuthSnapshot(): AuthState {
-  return { status: "loading", user: null };
+  return SERVER_SNAPSHOT;
 }
