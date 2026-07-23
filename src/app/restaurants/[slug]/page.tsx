@@ -251,16 +251,14 @@ export default async function RestaurantPage({ params }: Props) {
             <NearbyParking data={restaurant.nearby_parking} />
 
             {restaurant.google_maps_url ? (
-              <div className="mb-6">
-                <a
-                  href={restaurant.google_maps_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm font-semibold text-primary hover:text-primary-dark"
-                >
-                  View on Google Maps →
-                </a>
-              </div>
+              <a
+                href={restaurant.google_maps_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-semibold text-primary hover:text-primary-dark"
+              >
+                View on Google Maps →
+              </a>
             ) : null}
 
             {!restaurant.photo_url ? <SuggestPhotoForm restaurantId={restaurant.id} /> : null}
