@@ -364,15 +364,39 @@ export async function getRestaurantReviews(
   return { reviews, averageRating, count };
 }
 
+export type ClaimResult = {
+  claimId: string;
+  needsEmailVerification: boolean;
+  verifyToken: string | null;
+  restaurantEmail: string | null;
+  restaurantName: string;
+};
+
 export async function submitListingClaim(input: {
   restaurant_id: string;
-  user_id: string;
   contact_name: string;
   contact_email: string;
   message?: string;
-}) {
-  const { error } = await supabase.from("listing_claims").insert(input);
+}): Promise<ClaimResult> {
+  // The restaurant's own listed email (not whatever the claimant typed) is
+  // what actually gets verified — this RPC decides that and, when possible,
+  // hands back a one-time token for the caller to email there.
+  const { data, error } = await supabase.rpc("submit_listing_claim", {
+    p_restaurant_id: input.restaurant_id,
+    p_contact_name: input.contact_name,
+    p_contact_email: input.contact_email,
+    p_message: input.message ?? "",
+  });
   if (error) throw new Error(error.message);
+  const row = data?.[0];
+  if (!row) throw new Error("Failed to submit claim.");
+  return {
+    claimId: row.claim_id,
+    needsEmailVerification: row.needs_email_verification,
+    verifyToken: row.verify_token,
+    restaurantEmail: row.restaurant_email,
+    restaurantName: row.restaurant_name,
+  };
 }
 
 export type UserReview = {

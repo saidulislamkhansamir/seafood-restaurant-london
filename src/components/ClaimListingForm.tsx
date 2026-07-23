@@ -3,7 +3,10 @@
 import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { submitListingClaim } from "@/lib/data";
+import { sendClaimVerificationEmail } from "@/app/claim/actions";
 import { subscribeAuth, getAuthSnapshot, getServerAuthSnapshot } from "@/lib/auth-store";
+
+type DoneState = "email_sent" | "pending_review" | "email_failed" | null;
 
 export function ClaimListingForm({ restaurantId }: { restaurantId: string }) {
   const { status, user } = useSyncExternalStore(subscribeAuth, getAuthSnapshot, getServerAuthSnapshot);
@@ -13,7 +16,7 @@ export function ClaimListingForm({ restaurantId }: { restaurantId: string }) {
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState<DoneState>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -21,14 +24,23 @@ export function ClaimListingForm({ restaurantId }: { restaurantId: string }) {
     setPending(true);
     setError(null);
     try {
-      await submitListingClaim({
+      const result = await submitListingClaim({
         restaurant_id: restaurantId,
-        user_id: user.id,
         contact_name: name,
         contact_email: email,
         message: message.trim() || undefined,
       });
-      setDone(true);
+
+      if (result.needsEmailVerification && result.verifyToken && result.restaurantEmail) {
+        const sent = await sendClaimVerificationEmail({
+          restaurantEmail: result.restaurantEmail,
+          restaurantName: result.restaurantName,
+          token: result.verifyToken,
+        });
+        setDone(sent.ok ? "email_sent" : "email_failed");
+      } else {
+        setDone("pending_review");
+      }
     } catch {
       setError("Something went wrong submitting your claim. Please try again.");
     } finally {
@@ -38,8 +50,31 @@ export function ClaimListingForm({ restaurantId }: { restaurantId: string }) {
 
   if (status === "loading") return null;
 
-  if (done) {
-    return <p className="mt-6 text-sm text-foreground/60">Thanks! We&apos;ll review your claim and get back to you.</p>;
+  if (done === "email_sent") {
+    return (
+      <p className="mt-6 text-sm text-foreground/60">
+        We&apos;ve sent a confirmation link to this restaurant&apos;s listed email address. Once it&apos;s clicked,
+        this listing will be marked as claimed.
+      </p>
+    );
+  }
+
+  if (done === "pending_review") {
+    return (
+      <p className="mt-6 text-sm text-foreground/60">
+        Thanks! This restaurant doesn&apos;t have an email on file to confirm automatically, so we&apos;ll review
+        your claim manually and get back to you.
+      </p>
+    );
+  }
+
+  if (done === "email_failed") {
+    return (
+      <p className="mt-6 text-sm text-foreground/60">
+        Your claim was submitted, but we couldn&apos;t send the confirmation email just now — we&apos;ll follow up
+        manually instead.
+      </p>
+    );
   }
 
   if (!open) {

@@ -55,7 +55,9 @@ export type Database = {
           message: string | null
           restaurant_id: string
           status: string
+          token_expires_at: string | null
           user_id: string
+          verification_token: string | null
         }
         Insert: {
           contact_email: string
@@ -65,7 +67,9 @@ export type Database = {
           message?: string | null
           restaurant_id: string
           status?: string
+          token_expires_at?: string | null
           user_id: string
+          verification_token?: string | null
         }
         Update: {
           contact_email?: string
@@ -75,7 +79,9 @@ export type Database = {
           message?: string | null
           restaurant_id?: string
           status?: string
+          token_expires_at?: string | null
           user_id?: string
+          verification_token?: string | null
         }
         Relationships: [
           {
@@ -428,6 +434,22 @@ export type Database = {
         Args: { p_restaurant_id: string; p_storage_path: string }
         Returns: boolean
       }
+      submit_listing_claim: {
+        Args: {
+          p_contact_email: string
+          p_contact_name: string
+          p_message: string
+          p_restaurant_id: string
+        }
+        Returns: {
+          claim_id: string
+          needs_email_verification: boolean
+          restaurant_email: string
+          restaurant_name: string
+          verify_token: string
+        }[]
+      }
+      verify_listing_claim: { Args: { p_token: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
