@@ -227,11 +227,11 @@ export function ShareButton({ title }: { title: string }) {
         <span className="text-xs font-semibold text-foreground">Share</span>
       </button>
 
-      {/* w-full + flex-wrap: on a narrow phone the row wraps onto a second
-          line instead of overflowing past the screen edge. */}
+      {/* max-w-[85vw] caps the row to the phone screen so it wraps instead
+          of overflowing; sm:max-w-[420px] restores the wider desktop row. */}
       <div
         inert={!open}
-        className={`flex w-full flex-wrap items-center gap-1 overflow-hidden py-1 transition-all duration-300 ease-out ${
+        className={`flex max-w-[85vw] flex-wrap items-center gap-1 overflow-hidden py-1 transition-all duration-300 ease-out sm:max-w-[420px] ${
           open ? "max-h-24 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
