@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Container } from "./Container";
+import { NewsletterSignupForm } from "./NewsletterSignupForm";
 
 export function Footer() {
   return (
@@ -12,6 +13,10 @@ export function Footer() {
             The London restaurant directory: seafood, fish & chips, takeaway and more, borough by
             borough.
           </p>
+          <p className="mt-6 text-sm font-semibold">Get new restaurants in your inbox</p>
+          <div className="mt-2">
+            <NewsletterSignupForm />
+          </div>
         </div>
         <div className="flex flex-wrap gap-x-16 gap-y-8">
           <div>

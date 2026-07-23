@@ -117,6 +117,24 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_subscribers: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       photo_submissions: {
         Row: {
           created_at: string
@@ -201,6 +219,7 @@ export type Database = {
           listing_status: string | null
           lng: number | null
           location_area: string | null
+          member_discount: string | null
           menu_link: string | null
           name: string
           nearby_parking: Json | null
@@ -247,6 +266,7 @@ export type Database = {
           listing_status?: string | null
           lng?: number | null
           location_area?: string | null
+          member_discount?: string | null
           menu_link?: string | null
           name: string
           nearby_parking?: Json | null
@@ -293,6 +313,7 @@ export type Database = {
           listing_status?: string | null
           lng?: number | null
           location_area?: string | null
+          member_discount?: string | null
           menu_link?: string | null
           name?: string
           nearby_parking?: Json | null

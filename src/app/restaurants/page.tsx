@@ -4,14 +4,16 @@ import { Container } from "@/components/Container";
 import { SearchBar } from "@/components/SearchBar";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { Pagination } from "@/components/Pagination";
-import { getRestaurantsPage, getCategories, getBoroughs } from "@/lib/data";
+import { getRestaurantsPage, getAllRestaurants, getCategories, getBoroughs } from "@/lib/data";
 import { faqJsonLd } from "@/lib/seo";
+import { getLiveStatus } from "@/lib/opening-hours";
+import { isActive } from "@/lib/restaurant-status";
 
 export const revalidate = 3600;
 
 const PAGE_SIZE = 24;
 
-type SearchParams = { q?: string; category?: string; borough?: string; page?: string };
+type SearchParams = { q?: string; category?: string; borough?: string; page?: string; open?: string };
 
 export async function generateMetadata({
   searchParams,
@@ -36,13 +38,38 @@ export default async function RestaurantsPage({
 }) {
   const params = await searchParams;
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
-  const hasFilters = Boolean(params.q || params.category || params.borough);
+  const openOnly = params.open === "true";
+  const hasFilters = Boolean(params.q || params.category || params.borough || openOnly);
   const showEditorial = !hasFilters && page === 1;
-  const [{ restaurants, total, pageSize }, categories, boroughs] = await Promise.all([
-    getRestaurantsPage({ q: params.q, category: params.category, borough: params.borough }, page, PAGE_SIZE),
+  const filters = { q: params.q, category: params.category, borough: params.borough };
+
+  const [pageResult, categories, boroughs] = await Promise.all([
+    // "Open now" isn't a stored column (it depends on the current time), so
+    // it can't be filtered at the database level — fetch every matching
+    // restaurant, filter by live status, then paginate the filtered list in
+    // memory. Only paid for when this filter is actually on; the normal
+    // path still uses efficient DB-level pagination.
+    openOnly ? getAllRestaurants(filters) : getRestaurantsPage(filters, page, PAGE_SIZE),
     getCategories(),
     getBoroughs(),
   ]);
+
+  let restaurants: Awaited<ReturnType<typeof getAllRestaurants>>;
+  let total: number;
+  let pageSize: number;
+  if (openOnly) {
+    const allOpenNow = (pageResult as Awaited<ReturnType<typeof getAllRestaurants>>).filter(
+      (r) => isActive(r.listing_status) && getLiveStatus(r.opening_hours)?.open
+    );
+    total = allOpenNow.length;
+    pageSize = PAGE_SIZE;
+    restaurants = allOpenNow.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  } else {
+    const paged = pageResult as Awaited<ReturnType<typeof getRestaurantsPage>>;
+    restaurants = paged.restaurants;
+    total = paged.total;
+    pageSize = paged.pageSize;
+  }
   const totalPages = Math.ceil(total / pageSize);
 
   const faqs = [
@@ -76,7 +103,9 @@ export default async function RestaurantsPage({
         />
       ) : null}
       <h1 className="text-3xl font-bold">All Restaurants</h1>
-      <p className="mt-2 text-foreground/60">{total} restaurants found</p>
+      <p className="mt-2 text-foreground/60">
+        {total} restaurant{total === 1 ? "" : "s"} {openOnly ? "open right now" : "found"}
+      </p>
       {showEditorial ? (
         <p className="mt-4 text-foreground/70 leading-relaxed">
           This is the full Seafood Restaurant London directory: every seafood restaurant, fish and
@@ -88,6 +117,28 @@ export default async function RestaurantsPage({
 
       <div className="mt-6">
         <SearchBar initialQuery={params.q} initialCategory={params.category} initialBorough={params.borough} />
+      </div>
+
+      <div className="mt-4">
+        <Link
+          href={(() => {
+            const qs = new URLSearchParams();
+            if (params.q) qs.set("q", params.q);
+            if (params.category) qs.set("category", params.category);
+            if (params.borough) qs.set("borough", params.borough);
+            if (!openOnly) qs.set("open", "true");
+            const s = qs.toString();
+            return `/restaurants${s ? `?${s}` : ""}`;
+          })()}
+          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+            openOnly
+              ? "border-primary bg-primary text-white"
+              : "border-border bg-white text-foreground/70 hover:border-primary hover:text-primary"
+          }`}
+        >
+          <span className={`h-1.5 w-1.5 rounded-full ${openOnly ? "bg-white" : "bg-green-500"}`} aria-hidden />
+          {openOnly ? "Showing open now — clear" : "Show only open now"}
+        </Link>
       </div>
 
       <div className="mt-6 flex flex-wrap items-center gap-2">

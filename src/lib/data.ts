@@ -436,3 +436,8 @@ export async function getClaimsByUser(userId: string): Promise<UserClaim[]> {
     .order("created_at", { ascending: false });
   return (data ?? []) as unknown as UserClaim[];
 }
+
+export async function subscribeToNewsletter(email: string) {
+  const { error } = await supabase.from("newsletter_subscribers").insert({ email });
+  if (error) throw new Error(error.message);
+}

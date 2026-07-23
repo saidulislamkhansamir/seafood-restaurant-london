@@ -16,6 +16,7 @@ import { ShareButton } from "@/components/ShareButton";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { WriteReviewForm } from "@/components/WriteReviewForm";
 import { ClaimListingForm } from "@/components/ClaimListingForm";
+import { MemberDiscountCard } from "@/components/MemberDiscountCard";
 import { categoryGradient } from "@/lib/category-icon";
 import { getRestaurantBySlug, getRelatedRestaurants, getRestaurantPhotos, getRestaurantReviews } from "@/lib/data";
 import { slugify } from "@/lib/utils";
@@ -224,6 +225,7 @@ export default async function RestaurantPage({ params }: Props) {
           </div>
 
           <aside className="h-fit rounded-2xl border border-border bg-white p-6">
+            {restaurant.member_discount ? <MemberDiscountCard discount={restaurant.member_discount} /> : null}
             {restaurant.lat && restaurant.lng ? (
               <div className="mb-6">
                 <MapEmbed lat={restaurant.lat} lng={restaurant.lng} label={restaurant.name} />
