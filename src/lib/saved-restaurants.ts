@@ -46,3 +46,9 @@ export function toggleSavedRestaurant(id: string): boolean {
   writeIds(ids);
   return false;
 }
+
+// Called once a browser's anonymous saves have been migrated into a real
+// account, so they don't linger and get out of sync with the account list.
+export function clearSavedRestaurants() {
+  writeIds([]);
+}

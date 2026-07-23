@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Container } from "@/components/Container";
 import { supabase } from "@/lib/supabase";
+import { migrateLocalSavesToAccount } from "@/lib/account-saved-restaurants";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,11 +18,14 @@ export default function LoginPage() {
     e.preventDefault();
     setPending(true);
     setError(null);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setPending(false);
     if (error) {
       setError(error.message);
       return;
+    }
+    if (data.user) {
+      migrateLocalSavesToAccount(data.user.id);
     }
     router.push("/");
   }
@@ -46,9 +50,14 @@ export default function LoginPage() {
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium">
-            Password
-          </label>
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="block text-sm font-medium">
+              Password
+            </label>
+            <Link href="/forgot-password" className="text-xs font-medium text-primary hover:text-primary-dark">
+              Forgot password?
+            </Link>
+          </div>
           <input
             id="password"
             type="password"

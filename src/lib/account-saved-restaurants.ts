@@ -1,6 +1,7 @@
 "use client";
 
 import { supabase } from "@/lib/supabase";
+import { getSavedIds, clearSavedRestaurants } from "@/lib/saved-restaurants";
 
 // Mirrors the shape of saved-restaurants.ts (the logged-out, localStorage
 // version) but backed by the saved_restaurants table for a logged-in user.
@@ -17,12 +18,31 @@ export function subscribeAccountSaved(callback: () => void): () => void {
   return () => listeners.delete(callback);
 }
 
-export async function loadAccountSaved(userId: string) {
-  if (loadedForUserId === userId) return;
+export async function loadAccountSaved(userId: string, force = false) {
+  if (!force && loadedForUserId === userId) return;
   const { data } = await supabase.from("saved_restaurants").select("restaurant_id").eq("user_id", userId);
   savedIds = new Set((data ?? []).map((row) => row.restaurant_id));
   loadedForUserId = userId;
   notify();
+}
+
+// Runs once right after a successful login: copies any restaurants saved
+// anonymously in this browser into the new account, then clears localStorage
+// so the two lists can't drift out of sync. Safe to call every login — it's
+// a no-op once localStorage is empty.
+export async function migrateLocalSavesToAccount(userId: string) {
+  const localIds = getSavedIds();
+  if (localIds.length === 0) return;
+
+  const rows = localIds.map((restaurant_id) => ({ user_id: userId, restaurant_id }));
+  const { error } = await supabase
+    .from("saved_restaurants")
+    .upsert(rows, { onConflict: "user_id,restaurant_id", ignoreDuplicates: true });
+
+  if (!error) {
+    clearSavedRestaurants();
+    await loadAccountSaved(userId, true);
+  }
 }
 
 export function clearAccountSaved() {
