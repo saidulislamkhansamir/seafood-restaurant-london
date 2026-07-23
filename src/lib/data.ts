@@ -295,24 +295,49 @@ export async function submitRestaurant(input: {
   if (error) throw new Error(error.message);
 }
 
+export type GalleryPhoto = { id: string; url: string };
+
+export async function getRestaurantPhotos(restaurantId: string): Promise<GalleryPhoto[]> {
+  const { data } = await supabase
+    .from("restaurant_photos")
+    .select("id, storage_path")
+    .eq("restaurant_id", restaurantId)
+    .order("created_at", { ascending: true });
+
+  return (data ?? []).map((p) => ({
+    id: p.id,
+    url: supabase.storage.from("restaurant-photos").getPublicUrl(p.storage_path).data.publicUrl,
+  }));
+}
+
 export async function submitRestaurantPhoto(input: {
   restaurant_id: string;
   storage_path: string;
-}): Promise<{ approved: boolean }> {
-  // Restaurants with no photo yet get the submitted one immediately — there's
-  // nothing to protect by holding it back. One that already has a photo goes
-  // to the pending queue instead, since a live photo shouldn't be silently
-  // replaced without a look.
+}): Promise<{ isHero: boolean }> {
+  // A restaurant with no photo yet gets this one as its main photo. One that
+  // already has a main photo gets this added to its gallery instead — purely
+  // additive, so it's safe to show right away rather than sitting unused in
+  // a review queue nobody ever processes.
   const { data: claimed, error: claimError } = await supabase.rpc("claim_restaurant_photo", {
     p_restaurant_id: input.restaurant_id,
     p_storage_path: input.storage_path,
   });
   if (claimError) throw new Error(claimError.message);
 
-  const { error } = await supabase
-    .from("photo_submissions")
-    .insert({ ...input, status: claimed ? "approved" : "pending" });
+  if (!claimed) {
+    const { error: galleryError } = await supabase
+      .from("restaurant_photos")
+      .insert({ restaurant_id: input.restaurant_id, storage_path: input.storage_path });
+    if (galleryError) throw new Error(galleryError.message);
+  }
+
+  const { error } = await supabase.from("photo_submissions").insert({ ...input, status: "approved" });
   if (error) throw new Error(error.message);
 
-  return { approved: Boolean(claimed) };
+  return { isHero: Boolean(claimed) };
+}
+
+export async function submitInfoReport(input: { restaurant_id: string; message: string }) {
+  const { error } = await supabase.from("info_reports").insert(input);
+  if (error) throw new Error(error.message);
 }

@@ -3,6 +3,7 @@ import Image from "next/image";
 import type { Restaurant } from "@/lib/data";
 import { StarRating } from "./StarRating";
 import { StatusBadge } from "./StatusBadge";
+import { SaveButton } from "./SaveButton";
 import { categoryGradient } from "@/lib/category-icon";
 import { getLiveStatus } from "@/lib/opening-hours";
 import { isActive } from "@/lib/restaurant-status";
@@ -31,6 +32,7 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
             liveStatus={liveStatus}
             className="absolute left-2 top-2 shadow-sm"
           />
+          <SaveButton restaurantId={restaurant.id} className="absolute right-2 top-2" />
         </div>
       ) : (
         <div
@@ -51,6 +53,7 @@ export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
             liveStatus={liveStatus}
             className="absolute left-2 top-2 shadow-sm"
           />
+          <SaveButton restaurantId={restaurant.id} className="absolute right-2 top-2" />
         </div>
       )}
       <div className="flex flex-1 flex-col gap-2 p-4">

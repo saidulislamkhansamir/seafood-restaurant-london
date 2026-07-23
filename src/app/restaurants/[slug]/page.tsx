@@ -6,12 +6,16 @@ import { Container } from "@/components/Container";
 import { StarRating } from "@/components/StarRating";
 import { MapEmbed } from "@/components/MapEmbed";
 import { SuggestPhotoForm } from "@/components/SuggestPhotoForm";
+import { ReportInfoForm } from "@/components/ReportInfoForm";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { NearbyStations } from "@/components/NearbyStations";
 import { NearbyParking } from "@/components/NearbyParking";
 import { StatusBadge } from "@/components/StatusBadge";
+import { SaveButton } from "@/components/SaveButton";
+import { ShareButton } from "@/components/ShareButton";
+import { PhotoGallery } from "@/components/PhotoGallery";
 import { categoryGradient } from "@/lib/category-icon";
-import { getRestaurantBySlug, getRelatedRestaurants } from "@/lib/data";
+import { getRestaurantBySlug, getRelatedRestaurants, getRestaurantPhotos } from "@/lib/data";
 import { slugify } from "@/lib/utils";
 import { breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 import { groupAttributes } from "@/lib/attribute-groups";
@@ -45,6 +49,7 @@ export default async function RestaurantPage({ params }: Props) {
   if (!restaurant) notFound();
 
   const related = await getRelatedRestaurants(restaurant);
+  const galleryPhotos = await getRestaurantPhotos(restaurant.id);
   const attributeGroups = groupAttributes(restaurant.attributes ?? []);
   const faqs = buildRestaurantFaqs(restaurant, attributeGroups);
   const liveStatus = isActive(restaurant.listing_status) ? getLiveStatus(restaurant.opening_hours) : null;
@@ -126,6 +131,12 @@ export default async function RestaurantPage({ params }: Props) {
         </div>
       )}
 
+      {galleryPhotos.length > 0 ? (
+        <Container className="pt-4">
+          <PhotoGallery photos={galleryPhotos} />
+        </Container>
+      ) : null}
+
       <Container className="py-10">
         <nav className="mb-4 text-sm text-foreground/50">
           <Link href="/restaurants" className="hover:text-primary">All Restaurants</Link>
@@ -150,6 +161,10 @@ export default async function RestaurantPage({ params }: Props) {
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-3xl font-bold">{restaurant.name}</h1>
               <StatusBadge status={restaurant.listing_status} liveStatus={liveStatus} detailed />
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              <SaveButton restaurantId={restaurant.id} label />
+              <ShareButton title={restaurant.name} />
             </div>
             <div className="mt-3">
               <StarRating rating={restaurant.rating} reviewCount={restaurant.review_count} />
@@ -242,6 +257,16 @@ export default async function RestaurantPage({ params }: Props) {
                   <div>
                     <dt className="font-semibold text-foreground/50">Opening Hours</dt>
                     <dd className="mt-1 whitespace-pre-line">{restaurant.opening_hours.replace(/\s\|\s/g, "\n")}</dd>
+                    {restaurant.opening_hours_checked_at ? (
+                      <p className="mt-1 text-xs text-foreground/40">
+                        Checked{" "}
+                        {new Date(restaurant.opening_hours_checked_at).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
+                    ) : null}
                   </div>
                 ) : null}
               </dl>
@@ -262,6 +287,7 @@ export default async function RestaurantPage({ params }: Props) {
             ) : null}
 
             {!restaurant.photo_url ? <SuggestPhotoForm restaurantId={restaurant.id} /> : null}
+            <ReportInfoForm restaurantId={restaurant.id} />
           </aside>
         </div>
 

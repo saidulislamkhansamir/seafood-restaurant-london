@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      info_reports: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          restaurant_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          restaurant_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          restaurant_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "info_reports_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       locations: {
         Row: {
           borough: string | null
@@ -70,6 +102,35 @@ export type Database = {
           },
         ]
       }
+      restaurant_photos: {
+        Row: {
+          created_at: string
+          id: string
+          restaurant_id: string
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          restaurant_id: string
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          restaurant_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_photos_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       restaurants: {
         Row: {
           attributes: string[] | null
@@ -98,6 +159,7 @@ export type Database = {
           nearby_parking: Json | null
           nearby_stations: Json | null
           opening_hours: string | null
+          opening_hours_checked_at: string | null
           phone: string | null
           photo_url: string | null
           photos_count: number | null
@@ -142,6 +204,7 @@ export type Database = {
           nearby_parking?: Json | null
           nearby_stations?: Json | null
           opening_hours?: string | null
+          opening_hours_checked_at?: string | null
           phone?: string | null
           photo_url?: string | null
           photos_count?: number | null
@@ -186,6 +249,7 @@ export type Database = {
           nearby_parking?: Json | null
           nearby_stations?: Json | null
           opening_hours?: string | null
+          opening_hours_checked_at?: string | null
           phone?: string | null
           photo_url?: string | null
           photos_count?: number | null

@@ -10,6 +10,7 @@ const NAV = [
   { href: "/seafood-restaurant", label: "Seafood" },
   { href: "/fish-and-chips-shop", label: "Fish & Chips" },
   { href: "/blog", label: "Guides" },
+  { href: "/saved", label: "Saved" },
 ];
 
 export function Header() {
