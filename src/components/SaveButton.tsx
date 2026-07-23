@@ -7,6 +7,10 @@ import {
   subscribeSavedRestaurants,
 } from "@/lib/saved-restaurants";
 
+function noopSubscribe() {
+  return () => {};
+}
+
 export function SaveButton({
   restaurantId,
   label = false,
@@ -24,6 +28,13 @@ export function SaveButton({
     () => isRestaurantSaved(restaurantId),
     () => false
   );
+
+  // Until mounted, `saved` above is always a guess (false) — the real value
+  // only exists in this browser's localStorage, which we can't read during
+  // SSR. Rather than show "Save" and then pop to "Saved" once we know the
+  // truth, fade the button in only once we already know it — no flash of
+  // wrong content, just a brief, gentle appearance.
+  const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
 
   // Bumping this key remounts the heart icon, which restarts the CSS "pop"
   // animation — a small, satisfying confirmation when saving (not on
@@ -68,7 +79,9 @@ export function SaveButton({
         onClick={handleClick}
         aria-label={saved ? "Remove from saved" : "Save this restaurant"}
         aria-pressed={saved}
-        className={`flex h-9 w-9 items-center justify-center rounded-full bg-white/95 shadow-sm backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-90 ${className}`}
+        className={`flex h-9 w-9 items-center justify-center rounded-full bg-white/95 shadow-sm backdrop-blur-sm transition-all duration-200 hover:scale-110 hover:shadow-md active:scale-90 ${
+          mounted ? "opacity-100" : "opacity-0"
+        } ${className}`}
       >
         {heart}
       </button>
@@ -81,7 +94,9 @@ export function SaveButton({
       onClick={handleClick}
       aria-label={saved ? "Remove from saved" : "Save this restaurant"}
       aria-pressed={saved}
-      className={`inline-flex items-center gap-1.5 rounded-full border border-border bg-white py-1 pl-1 pr-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-95 ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border border-border bg-white py-1 pl-1 pr-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-95 ${
+        mounted ? "opacity-100" : "opacity-0"
+      } ${className}`}
     >
       <span
         className={`flex h-5 w-5 items-center justify-center rounded-full transition-colors duration-200 ${
