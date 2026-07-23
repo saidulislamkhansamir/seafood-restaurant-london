@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Container } from "./Container";
+import { supabase } from "@/lib/supabase";
+import { subscribeAuth, getAuthSnapshot, getServerAuthSnapshot } from "@/lib/auth-store";
 
 const NAV = [
   { href: "/restaurants", label: "All Restaurants" },
@@ -15,6 +17,12 @@ const NAV = [
 
 export function Header() {
   const [open, setOpen] = useState(false);
+  const { user } = useSyncExternalStore(subscribeAuth, getAuthSnapshot, getServerAuthSnapshot);
+
+  function handleLogout() {
+    supabase.auth.signOut();
+    setOpen(false);
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur">
@@ -29,12 +37,27 @@ export function Header() {
             </Link>
           ))}
         </nav>
-        <Link
-          href="/add-your-restaurant"
-          className="hidden shrink-0 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-dark transition-colors md:inline-block"
-        >
-          Add Your Restaurant
-        </Link>
+        <div className="hidden shrink-0 items-center gap-4 md:flex">
+          {user ? (
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
+            >
+              Log out
+            </button>
+          ) : (
+            <Link href="/login" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+              Log in
+            </Link>
+          )}
+          <Link
+            href="/add-your-restaurant"
+            className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent-dark transition-colors"
+          >
+            Add Your Restaurant
+          </Link>
+        </div>
         <button
           type="button"
           aria-label={open ? "Close menu" : "Open menu"}
@@ -67,6 +90,23 @@ export function Header() {
                 {item.label}
               </Link>
             ))}
+            {user ? (
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-lg px-3 py-2.5 text-left text-base font-medium text-foreground/80 hover:bg-muted hover:text-primary transition-colors"
+              >
+                Log out
+              </button>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="rounded-lg px-3 py-2.5 text-base font-medium text-foreground/80 hover:bg-muted hover:text-primary transition-colors"
+              >
+                Log in
+              </Link>
+            )}
             <Link
               href="/add-your-restaurant"
               onClick={() => setOpen(false)}

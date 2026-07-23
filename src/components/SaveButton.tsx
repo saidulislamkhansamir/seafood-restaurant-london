@@ -6,6 +6,12 @@ import {
   toggleSavedRestaurant,
   subscribeSavedRestaurants,
 } from "@/lib/saved-restaurants";
+import {
+  isAccountRestaurantSaved,
+  subscribeAccountSaved,
+  toggleAccountSavedRestaurant,
+} from "@/lib/account-saved-restaurants";
+import { subscribeAuth, getAuthSnapshot, getServerAuthSnapshot } from "@/lib/auth-store";
 
 export function SaveButton({
   restaurantId,
@@ -16,14 +22,24 @@ export function SaveButton({
   label?: boolean;
   className?: string;
 }) {
-  // useSyncExternalStore reads localStorage safely — server snapshot is
-  // always false, so there's no hydration mismatch, and it re-renders
-  // whenever any SaveButton on the page toggles this restaurant.
-  const saved = useSyncExternalStore(
+  // Logged-in users save to their account (synced across devices); logged-out
+  // visitors keep the original localStorage-only behavior, unchanged.
+  const { user } = useSyncExternalStore(subscribeAuth, getAuthSnapshot, getServerAuthSnapshot);
+
+  // useSyncExternalStore reads localStorage/the account cache safely — server
+  // snapshot is always false, so there's no hydration mismatch, and it
+  // re-renders whenever any SaveButton on the page toggles this restaurant.
+  const localSaved = useSyncExternalStore(
     subscribeSavedRestaurants,
     () => isRestaurantSaved(restaurantId),
     () => false
   );
+  const accountSaved = useSyncExternalStore(
+    subscribeAccountSaved,
+    () => isAccountRestaurantSaved(restaurantId),
+    () => false
+  );
+  const saved = user ? accountSaved : localSaved;
 
   // Bumping this key remounts the heart icon, which restarts the CSS "pop"
   // animation — a small, satisfying confirmation when saving (not on
@@ -33,6 +49,12 @@ export function SaveButton({
   function handleClick(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
+    if (user) {
+      toggleAccountSavedRestaurant(user.id, restaurantId).then((nowSaved) => {
+        if (nowSaved) setPulseKey((k) => k + 1);
+      });
+      return;
+    }
     const nowSaved = toggleSavedRestaurant(restaurantId);
     if (nowSaved) setPulseKey((k) => k + 1);
   }
