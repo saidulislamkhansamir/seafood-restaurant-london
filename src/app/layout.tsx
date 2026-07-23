@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { SITE_IS_LIVE } from "@/lib/site-config";
+import { SITE_IS_LIVE, SITE_URL } from "@/lib/site-config";
 
-const siteUrl = "https://seafoodrestaurantlondon.co.uk";
+const siteUrl = SITE_URL;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

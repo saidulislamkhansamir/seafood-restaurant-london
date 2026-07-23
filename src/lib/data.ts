@@ -341,3 +341,36 @@ export async function submitInfoReport(input: { restaurant_id: string; message: 
   const { error } = await supabase.from("info_reports").insert(input);
   if (error) throw new Error(error.message);
 }
+
+export type Review = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+};
+
+export async function getRestaurantReviews(
+  restaurantId: string
+): Promise<{ reviews: Review[]; averageRating: number | null; count: number }> {
+  const { data } = await supabase
+    .from("reviews")
+    .select("id, rating, comment, created_at")
+    .eq("restaurant_id", restaurantId)
+    .order("created_at", { ascending: false });
+
+  const reviews = data ?? [];
+  const count = reviews.length;
+  const averageRating = count > 0 ? reviews.reduce((sum, r) => sum + r.rating, 0) / count : null;
+  return { reviews, averageRating, count };
+}
+
+export async function submitListingClaim(input: {
+  restaurant_id: string;
+  user_id: string;
+  contact_name: string;
+  contact_email: string;
+  message?: string;
+}) {
+  const { error } = await supabase.from("listing_claims").insert(input);
+  if (error) throw new Error(error.message);
+}

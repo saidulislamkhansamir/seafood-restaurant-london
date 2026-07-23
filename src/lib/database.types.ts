@@ -46,6 +46,47 @@ export type Database = {
           },
         ]
       }
+      listing_claims: {
+        Row: {
+          contact_email: string
+          contact_name: string
+          created_at: string
+          id: string
+          message: string | null
+          restaurant_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          contact_email: string
+          contact_name: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          restaurant_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          contact_email?: string
+          contact_name?: string
+          created_at?: string
+          id?: string
+          message?: string | null
+          restaurant_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "listing_claims_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       locations: {
         Row: {
           borough: string | null
@@ -160,6 +201,7 @@ export type Database = {
           nearby_stations: Json | null
           opening_hours: string | null
           opening_hours_checked_at: string | null
+          owner_claimed: boolean
           phone: string | null
           photo_url: string | null
           photos_count: number | null
@@ -205,6 +247,7 @@ export type Database = {
           nearby_stations?: Json | null
           opening_hours?: string | null
           opening_hours_checked_at?: string | null
+          owner_claimed?: boolean
           phone?: string | null
           photo_url?: string | null
           photos_count?: number | null
@@ -250,6 +293,7 @@ export type Database = {
           nearby_stations?: Json | null
           opening_hours?: string | null
           opening_hours_checked_at?: string | null
+          owner_claimed?: boolean
           phone?: string | null
           photo_url?: string | null
           photos_count?: number | null
@@ -268,6 +312,44 @@ export type Database = {
           website_url?: string | null
         }
         Relationships: []
+      }
+      reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          rating: number
+          restaurant_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating: number
+          restaurant_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          rating?: number
+          restaurant_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       saved_restaurants: {
         Row: {

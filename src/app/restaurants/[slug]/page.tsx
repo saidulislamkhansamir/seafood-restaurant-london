@@ -14,14 +14,17 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { SaveButton } from "@/components/SaveButton";
 import { ShareButton } from "@/components/ShareButton";
 import { PhotoGallery } from "@/components/PhotoGallery";
+import { WriteReviewForm } from "@/components/WriteReviewForm";
+import { ClaimListingForm } from "@/components/ClaimListingForm";
 import { categoryGradient } from "@/lib/category-icon";
-import { getRestaurantBySlug, getRelatedRestaurants, getRestaurantPhotos } from "@/lib/data";
+import { getRestaurantBySlug, getRelatedRestaurants, getRestaurantPhotos, getRestaurantReviews } from "@/lib/data";
 import { slugify } from "@/lib/utils";
 import { breadcrumbJsonLd, faqJsonLd } from "@/lib/seo";
 import { groupAttributes } from "@/lib/attribute-groups";
 import { buildRestaurantFaqs } from "@/lib/restaurant-faq";
 import { isActive, statusBannerMessage, statusBannerClasses } from "@/lib/restaurant-status";
 import { getLiveStatus } from "@/lib/opening-hours";
+import { SITE_URL } from "@/lib/site-config";
 
 export const revalidate = 3600;
 
@@ -50,6 +53,9 @@ export default async function RestaurantPage({ params }: Props) {
 
   const related = await getRelatedRestaurants(restaurant);
   const galleryPhotos = await getRestaurantPhotos(restaurant.id);
+  const { reviews, averageRating, count: reviewCount } = await getRestaurantReviews(restaurant.id);
+  const restaurantUrl = `${SITE_URL}/restaurants/${slug}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(restaurantUrl)}`;
   const attributeGroups = groupAttributes(restaurant.attributes ?? []);
   const faqs = buildRestaurantFaqs(restaurant, attributeGroups);
   const liveStatus = isActive(restaurant.listing_status) ? getLiveStatus(restaurant.opening_hours) : null;
@@ -161,6 +167,11 @@ export default async function RestaurantPage({ params }: Props) {
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-3xl font-bold">{restaurant.name}</h1>
               <StatusBadge status={restaurant.listing_status} liveStatus={liveStatus} detailed />
+              {restaurant.owner_claimed ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 whitespace-nowrap">
+                  ✓ Verified Owner
+                </span>
+              ) : null}
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-3">
               <SaveButton restaurantId={restaurant.id} label />
@@ -288,7 +299,66 @@ export default async function RestaurantPage({ params }: Props) {
 
             {!restaurant.photo_url ? <SuggestPhotoForm restaurantId={restaurant.id} /> : null}
             <ReportInfoForm restaurantId={restaurant.id} />
+
+            <div className="mt-6 flex items-center gap-3 border-t border-border pt-6">
+              {/* eslint-disable-next-line @next/next/no-img-element -- external QR image, not an optimizable local asset */}
+              <img
+                src={qrCodeUrl}
+                alt={`QR code linking to ${restaurant.name}'s page`}
+                width={72}
+                height={72}
+                loading="lazy"
+                className="h-[72px] w-[72px] shrink-0 rounded-lg border border-border"
+              />
+              <p className="text-xs text-foreground/60">
+                Scan to open this page on your phone — handy for menus, table cards or flyers.
+              </p>
+            </div>
+
+            {!restaurant.owner_claimed ? <ClaimListingForm restaurantId={restaurant.id} /> : null}
           </aside>
+        </div>
+
+        <div className="mt-16 max-w-3xl border-t border-border pt-10">
+          <h2 className="text-xl font-bold">Reviews from Visitors</h2>
+          {reviewCount > 0 ? (
+            <p className="mt-1 text-sm text-foreground/60">
+              <span className="font-semibold text-foreground">{averageRating!.toFixed(1)} ★</span> average from{" "}
+              {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
+            </p>
+          ) : (
+            <p className="mt-1 text-sm text-foreground/60">No reviews yet — be the first to leave one.</p>
+          )}
+
+          {reviews.length > 0 ? (
+            <div className="mt-6 divide-y divide-border">
+              {reviews.map((review) => (
+                <div key={review.id} className="py-4 first:pt-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-coral">
+                      {"★".repeat(review.rating)}
+                      <span className="text-border">{"★".repeat(5 - review.rating)}</span>
+                    </span>
+                    <span className="text-xs text-foreground/50">
+                      {new Date(review.created_at).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                  </div>
+                  {review.comment ? <p className="mt-1.5 text-sm text-foreground/80">{review.comment}</p> : null}
+                </div>
+              ))}
+            </div>
+          ) : null}
+
+          <div className="mt-6 border-t border-border pt-6">
+            <h3 className="text-sm font-semibold">Leave a review</h3>
+            <div className="mt-3">
+              <WriteReviewForm restaurantId={restaurant.id} />
+            </div>
+          </div>
         </div>
 
         {faqs.length >= 2 ? (
