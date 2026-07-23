@@ -39,13 +39,18 @@ export function Header() {
         </nav>
         <div className="hidden shrink-0 items-center gap-4 md:flex">
           {user ? (
-            <button
-              type="button"
-              onClick={handleLogout}
-              className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
-            >
-              Log out
-            </button>
+            <>
+              <Link href="/account" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
+                My Account
+              </Link>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors"
+              >
+                Log out
+              </button>
+            </>
           ) : (
             <Link href="/login" className="text-sm font-medium text-foreground/80 hover:text-primary transition-colors">
               Log in
@@ -91,13 +96,22 @@ export function Header() {
               </Link>
             ))}
             {user ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="rounded-lg px-3 py-2.5 text-left text-base font-medium text-foreground/80 hover:bg-muted hover:text-primary transition-colors"
-              >
-                Log out
-              </button>
+              <>
+                <Link
+                  href="/account"
+                  onClick={() => setOpen(false)}
+                  className="rounded-lg px-3 py-2.5 text-base font-medium text-foreground/80 hover:bg-muted hover:text-primary transition-colors"
+                >
+                  My Account
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="rounded-lg px-3 py-2.5 text-left text-base font-medium text-foreground/80 hover:bg-muted hover:text-primary transition-colors"
+                >
+                  Log out
+                </button>
+              </>
             ) : (
               <Link
                 href="/login"

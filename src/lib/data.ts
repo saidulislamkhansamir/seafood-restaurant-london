@@ -374,3 +374,41 @@ export async function submitListingClaim(input: {
   const { error } = await supabase.from("listing_claims").insert(input);
   if (error) throw new Error(error.message);
 }
+
+export type UserReview = {
+  id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+  restaurant: { name: string; slug: string } | null;
+};
+
+export async function getReviewsByUser(userId: string): Promise<UserReview[]> {
+  const { data } = await supabase
+    .from("reviews")
+    .select("id, rating, comment, created_at, restaurant:restaurants(name, slug)")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  return (data ?? []) as unknown as UserReview[];
+}
+
+export async function deleteReview(reviewId: string) {
+  const { error } = await supabase.from("reviews").delete().eq("id", reviewId);
+  if (error) throw new Error(error.message);
+}
+
+export type UserClaim = {
+  id: string;
+  status: string;
+  created_at: string;
+  restaurant: { name: string; slug: string } | null;
+};
+
+export async function getClaimsByUser(userId: string): Promise<UserClaim[]> {
+  const { data } = await supabase
+    .from("listing_claims")
+    .select("id, status, created_at, restaurant:restaurants(name, slug)")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+  return (data ?? []) as unknown as UserClaim[];
+}
