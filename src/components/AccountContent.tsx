@@ -4,6 +4,7 @@ import { useEffect, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { Container } from "@/components/Container";
 import { SavedRestaurantsList } from "@/components/SavedRestaurantsList";
+import { ChangeEmailForm } from "@/components/ChangeEmailForm";
 import { ChangePasswordForm } from "@/components/ChangePasswordForm";
 import { MyReviewsList } from "@/components/MyReviewsList";
 import { MyClaimsList } from "@/components/MyClaimsList";
@@ -38,6 +39,13 @@ export function AccountContent() {
           year: "numeric",
         })}
       </p>
+
+      <div className="mt-10 border-t border-border pt-8">
+        <h2 className="text-lg font-bold">Change Email</h2>
+        <div className="mt-4 max-w-sm">
+          <ChangeEmailForm />
+        </div>
+      </div>
 
       <div className="mt-10 border-t border-border pt-8">
         <h2 className="text-lg font-bold">Change Password</h2>
