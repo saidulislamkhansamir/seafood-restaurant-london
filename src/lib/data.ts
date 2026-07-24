@@ -32,6 +32,7 @@ type RestaurantFilters = {
   area?: string;
   q?: string;
   price?: string;
+  attrs?: string[];
 };
 
 export async function getAllRestaurants(filters?: RestaurantFilters): Promise<Restaurant[]> {
@@ -41,6 +42,9 @@ export async function getAllRestaurants(filters?: RestaurantFilters): Promise<Re
   if (filters?.borough) query = query.ilike("borough", filters.borough);
   if (filters?.area) query = query.ilike("location_area", filters.area);
   if (filters?.price) query = query.eq("price_range", filters.price);
+  // "Has all of these attributes" (AND), not "has any" — someone filtering
+  // for Delivery + Wheelchair accessible wants both, not either.
+  if (filters?.attrs && filters.attrs.length > 0) query = query.contains("attributes", filters.attrs);
   if (filters?.q) {
     query = query.or(
       `name.ilike.%${filters.q}%,description.ilike.%${filters.q}%,location_area.ilike.%${filters.q}%`
@@ -65,6 +69,7 @@ export async function getRestaurantsPage(
   if (filters?.borough) query = query.ilike("borough", filters.borough);
   if (filters?.area) query = query.ilike("location_area", filters.area);
   if (filters?.price) query = query.eq("price_range", filters.price);
+  if (filters?.attrs && filters.attrs.length > 0) query = query.contains("attributes", filters.attrs);
   if (filters?.q) {
     query = query.or(
       `name.ilike.%${filters.q}%,description.ilike.%${filters.q}%,location_area.ilike.%${filters.q}%`

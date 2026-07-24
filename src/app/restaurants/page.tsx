@@ -16,6 +16,22 @@ export const revalidate = 3600;
 
 const PAGE_SIZE = 24;
 const PRICES = ["£", "££", "£££", "££££"];
+// Curated from the most common real attribute values in the data — not an
+// exhaustive list of everything in the `attributes` column, just the ones
+// common and clear-cut enough to be useful as filters.
+const ATTRIBUTES = [
+  "Takeaway",
+  "Delivery",
+  "Reservations",
+  "Wheelchair accessible",
+  "Outdoor seating",
+  "Family friendly",
+  "Dog friendly",
+  "Vegetarian options",
+  "Vegan options",
+  "Gluten-free options",
+  "Halal options",
+];
 
 type SearchParams = {
   q?: string;
@@ -24,6 +40,7 @@ type SearchParams = {
   page?: string;
   open?: string;
   price?: string;
+  attrs?: string;
   lat?: string;
   lng?: string;
   sort?: string;
@@ -36,7 +53,7 @@ export async function generateMetadata({
   searchParams: Promise<SearchParams>;
 }): Promise<Metadata> {
   const params = await searchParams;
-  const hasFilters = Boolean(params.q || params.category || params.borough || params.price);
+  const hasFilters = Boolean(params.q || params.category || params.borough || params.price || params.attrs);
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
   const canonical = hasFilters || page <= 1 ? "/restaurants" : `/restaurants?page=${page}`;
   return {
@@ -58,9 +75,18 @@ export default async function RestaurantsPage({
   const lat = params.lat ? Number.parseFloat(params.lat) : null;
   const lng = params.lng ? Number.parseFloat(params.lng) : null;
   const sortByDistance = params.sort === "distance" && lat != null && lng != null && !Number.isNaN(lat) && !Number.isNaN(lng);
-  const hasFilters = Boolean(params.q || params.category || params.borough || params.price || openOnly);
+  const selectedAttrs = params.attrs ? params.attrs.split(",").filter(Boolean) : [];
+  const hasFilters = Boolean(
+    params.q || params.category || params.borough || params.price || openOnly || selectedAttrs.length > 0
+  );
   const showEditorial = !hasFilters && page === 1 && !sortByDistance;
-  const filters = { q: params.q, category: params.category, borough: params.borough, price: params.price };
+  const filters = {
+    q: params.q,
+    category: params.category,
+    borough: params.borough,
+    price: params.price,
+    attrs: selectedAttrs,
+  };
 
   // "Open now" and "near me" both need every matching row up front (the
   // former depends on the current time, the latter on distance from the
@@ -114,6 +140,7 @@ export default async function RestaurantsPage({
     if (params.category) qs.set("category", params.category);
     if (params.borough) qs.set("borough", params.borough);
     if (params.price) qs.set("price", params.price);
+    if (selectedAttrs.length > 0) qs.set("attrs", selectedAttrs.join(","));
     if (openOnly) qs.set("open", "true");
     if (sortByDistance && lat != null && lng != null) {
       qs.set("lat", String(lat));
@@ -126,6 +153,13 @@ export default async function RestaurantsPage({
     }
     const s = qs.toString();
     return `/restaurants${s ? `?${s}` : ""}`;
+  }
+
+  function hrefToggleAttr(attr: string): string {
+    const next = selectedAttrs.includes(attr)
+      ? selectedAttrs.filter((a) => a !== attr)
+      : [...selectedAttrs, attr];
+    return withParams({ attrs: next.length > 0 ? next.join(",") : undefined, page: undefined });
   }
 
   const faqs = [
@@ -215,6 +249,27 @@ export default async function RestaurantsPage({
         >
           {mapView ? "☰ List view" : "🗺️ Map view"}
         </Link>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        {ATTRIBUTES.map((attr) => {
+          const active = selectedAttrs.includes(attr);
+          return (
+            <Link
+              key={attr}
+              href={hrefToggleAttr(attr)}
+              aria-pressed={active}
+              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                active
+                  ? "border-primary bg-primary text-white"
+                  : "border-border bg-white text-foreground/70 hover:border-primary hover:text-primary"
+              }`}
+            >
+              {active ? "✓ " : ""}
+              {attr}
+            </Link>
+          );
+        })}
       </div>
 
       <div className="mt-6 flex flex-wrap items-center gap-2">
