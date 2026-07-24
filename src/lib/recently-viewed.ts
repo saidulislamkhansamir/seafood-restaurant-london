@@ -24,15 +24,25 @@ export function subscribeRecentlyViewed(callback: () => void): () => void {
   return () => listeners.delete(callback);
 }
 
+// See the matching comment in compare-list.ts: useSyncExternalStore needs
+// the SAME array reference back when nothing changed, or it re-renders
+// forever ("Maximum update depth exceeded") — this is what was crashing
+// every page, since RecentlyViewedStrip mounts on the homepage.
+let cachedRaw: string | null = null;
+let cachedEntries: RecentlyViewedEntry[] = [];
+
 function readEntries(): RecentlyViewedEntry[] {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined") return cachedEntries;
+  const raw = window.localStorage.getItem(STORAGE_KEY);
+  if (raw === cachedRaw) return cachedEntries;
+  cachedRaw = raw;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
+    cachedEntries = Array.isArray(parsed) ? parsed : [];
   } catch {
-    return [];
+    cachedEntries = [];
   }
+  return cachedEntries;
 }
 
 function writeEntries(entries: RecentlyViewedEntry[]) {

@@ -11,15 +11,26 @@ export function subscribeCompareList(callback: () => void): () => void {
   return () => listeners.delete(callback);
 }
 
+// useSyncExternalStore compares snapshots by reference (Object.is), so
+// getCompareIds() must keep returning the SAME array object when the
+// underlying data hasn't changed — parsing a fresh array on every call
+// (even an identical empty []) looks like a change on every check and
+// causes an infinite re-render loop ("Maximum update depth exceeded").
+let cachedRaw: string | null = null;
+let cachedIds: string[] = [];
+
 function readIds(): string[] {
-  if (typeof window === "undefined") return [];
+  if (typeof window === "undefined") return cachedIds;
+  const raw = window.localStorage.getItem(STORAGE_KEY);
+  if (raw === cachedRaw) return cachedIds;
+  cachedRaw = raw;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
     const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed.filter((id) => typeof id === "string") : [];
+    cachedIds = Array.isArray(parsed) ? parsed.filter((id) => typeof id === "string") : [];
   } catch {
-    return [];
+    cachedIds = [];
   }
+  return cachedIds;
 }
 
 function writeIds(ids: string[]) {
