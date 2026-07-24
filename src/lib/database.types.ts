@@ -14,6 +14,21 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_users: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       info_reports: {
         Row: {
           created_at: string
@@ -451,10 +466,71 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_search_restaurants: {
+        Args: { p_query: string }
+        Returns: {
+          attributes: string[] | null
+          booking_link: string | null
+          borough: string | null
+          created_at: string | null
+          cuisine_tags: string[] | null
+          delivery_platforms: string[] | null
+          description: string | null
+          email: string | null
+          full_address: string | null
+          google_maps_url: string | null
+          has_booking: boolean | null
+          has_delivery: boolean | null
+          has_website: boolean | null
+          id: string
+          is_featured: boolean | null
+          is_premium: boolean | null
+          lat: number | null
+          latest_review_date: string | null
+          listing_status: string | null
+          lng: number | null
+          location_area: string | null
+          member_discount: string | null
+          menu_link: string | null
+          name: string
+          nearby_parking: Json | null
+          nearby_stations: Json | null
+          opening_hours: string | null
+          opening_hours_checked_at: string | null
+          owner_claimed: boolean
+          phone: string | null
+          photo_url: string | null
+          photos_count: number | null
+          postcode: string | null
+          postcode_district: string | null
+          price_range: string | null
+          primary_category: string | null
+          rating: number | null
+          review_count: number | null
+          slug: string
+          social_links: Json | null
+          specialities: string | null
+          subcategories: string[] | null
+          updated_at: string | null
+          verified: boolean | null
+          website_url: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "restaurants"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      admin_set_member_discount: {
+        Args: { p_member_discount: string; p_restaurant_id: string }
+        Returns: undefined
+      }
       claim_restaurant_photo: {
         Args: { p_restaurant_id: string; p_storage_path: string }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
       submit_listing_claim: {
         Args: {
           p_contact_email: string

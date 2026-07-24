@@ -107,6 +107,26 @@ export async function getRestaurantsByIds(ids: string[]): Promise<Restaurant[]> 
   return ids.map((id) => byId.get(id)).filter((r): r is Restaurant => Boolean(r));
 }
 
+export async function checkIsAdmin(): Promise<boolean> {
+  const { data, error } = await supabase.rpc("is_admin");
+  if (error) return false;
+  return data === true;
+}
+
+export async function adminSearchRestaurants(query: string): Promise<Restaurant[]> {
+  const { data, error } = await supabase.rpc("admin_search_restaurants", { p_query: query });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function adminSetMemberDiscount(restaurantId: string, memberDiscount: string) {
+  const { error } = await supabase.rpc("admin_set_member_discount", {
+    p_restaurant_id: restaurantId,
+    p_member_discount: memberDiscount,
+  });
+  if (error) throw new Error(error.message);
+}
+
 export async function getRelatedRestaurants(restaurant: Restaurant, limit = 6): Promise<Restaurant[]> {
   const results: Restaurant[] = [];
   const seen = new Set<string>([restaurant.id]);
