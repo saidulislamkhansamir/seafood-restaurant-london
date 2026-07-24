@@ -29,6 +29,24 @@ export type Database = {
         }
         Relationships: []
       }
+      banned_users: {
+        Row: {
+          banned_at: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          banned_at?: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          banned_at?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       info_reports: {
         Row: {
           created_at: string
@@ -175,6 +193,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "photo_submissions_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurant_edit_requests: {
+        Row: {
+          admin_note: string | null
+          changes: Json
+          created_at: string
+          id: string
+          restaurant_id: string
+          reviewed_at: string | null
+          status: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          changes: Json
+          created_at?: string
+          id?: string
+          restaurant_id: string
+          reviewed_at?: string | null
+          status?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          changes?: Json
+          created_at?: string
+          id?: string
+          restaurant_id?: string
+          reviewed_at?: string | null
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "restaurant_edit_requests_restaurant_id_fkey"
             columns: ["restaurant_id"]
             isOneToOne: false
             referencedRelation: "restaurants"
@@ -466,6 +525,113 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_approve_claim: { Args: { p_claim_id: string }; Returns: undefined }
+      admin_approve_submission: {
+        Args: { p_submission_id: string }
+        Returns: string
+      }
+      admin_ban_user: {
+        Args: { p_reason?: string; p_user_id: string }
+        Returns: undefined
+      }
+      admin_list_claims: {
+        Args: { p_status?: string }
+        Returns: {
+          contact_email: string
+          contact_name: string
+          created_at: string
+          id: string
+          message: string
+          restaurant_id: string
+          restaurant_name: string
+          restaurant_slug: string
+          status: string
+          user_id: string
+        }[]
+      }
+      admin_list_edit_requests: {
+        Args: { p_status?: string }
+        Returns: {
+          admin_note: string
+          changes: Json
+          created_at: string
+          id: string
+          restaurant_id: string
+          restaurant_name: string
+          restaurant_slug: string
+          reviewed_at: string
+          status: string
+          user_email: string
+          user_id: string
+        }[]
+      }
+      admin_list_info_reports: {
+        Args: { p_status?: string }
+        Returns: {
+          created_at: string
+          id: string
+          message: string
+          restaurant_id: string
+          restaurant_name: string
+          restaurant_slug: string
+          status: string
+        }[]
+      }
+      admin_list_recent_photos: {
+        Args: { p_limit?: number }
+        Returns: {
+          created_at: string
+          id: string
+          is_current_hero: boolean
+          restaurant_id: string
+          restaurant_name: string
+          restaurant_slug: string
+          storage_path: string
+        }[]
+      }
+      admin_list_submissions: {
+        Args: { p_status?: string }
+        Returns: {
+          address: string | null
+          category: string | null
+          contact_name: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          message: string | null
+          phone: string | null
+          photo_storage_path: string | null
+          restaurant_name: string
+          status: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "submissions"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      admin_reject_claim: { Args: { p_claim_id: string }; Returns: undefined }
+      admin_reject_submission: {
+        Args: { p_submission_id: string }
+        Returns: undefined
+      }
+      admin_remove_photo: {
+        Args: { p_restaurant_id: string; p_storage_path: string }
+        Returns: undefined
+      }
+      admin_resolve_info_report: {
+        Args: { p_dismiss?: boolean; p_report_id: string }
+        Returns: undefined
+      }
+      admin_review_edit_request: {
+        Args: {
+          p_admin_note?: string
+          p_approve: boolean
+          p_request_id: string
+        }
+        Returns: undefined
+      }
       admin_search_restaurants: {
         Args: { p_query: string }
         Returns: {
@@ -522,8 +688,27 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      admin_search_users: {
+        Args: { p_query: string }
+        Returns: {
+          ban_reason: string
+          banned: boolean
+          created_at: string
+          email: string
+          id: string
+        }[]
+      }
+      admin_set_listing_status: {
+        Args: { p_restaurant_id: string; p_status: string }
+        Returns: undefined
+      }
       admin_set_member_discount: {
         Args: { p_member_discount: string; p_restaurant_id: string }
+        Returns: undefined
+      }
+      admin_unban_user: { Args: { p_user_id: string }; Returns: undefined }
+      admin_update_restaurant: {
+        Args: { p_fields: Json; p_restaurant_id: string }
         Returns: undefined
       }
       claim_restaurant_photo: {
@@ -531,6 +716,67 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      is_banned: { Args: never; Returns: boolean }
+      my_claimed_restaurants: {
+        Args: never
+        Returns: {
+          attributes: string[] | null
+          booking_link: string | null
+          borough: string | null
+          created_at: string | null
+          cuisine_tags: string[] | null
+          delivery_platforms: string[] | null
+          description: string | null
+          email: string | null
+          full_address: string | null
+          google_maps_url: string | null
+          has_booking: boolean | null
+          has_delivery: boolean | null
+          has_website: boolean | null
+          id: string
+          is_featured: boolean | null
+          is_premium: boolean | null
+          lat: number | null
+          latest_review_date: string | null
+          listing_status: string | null
+          lng: number | null
+          location_area: string | null
+          member_discount: string | null
+          menu_link: string | null
+          name: string
+          nearby_parking: Json | null
+          nearby_stations: Json | null
+          opening_hours: string | null
+          opening_hours_checked_at: string | null
+          owner_claimed: boolean
+          phone: string | null
+          photo_url: string | null
+          photos_count: number | null
+          postcode: string | null
+          postcode_district: string | null
+          price_range: string | null
+          primary_category: string | null
+          rating: number | null
+          review_count: number | null
+          slug: string
+          social_links: Json | null
+          specialities: string | null
+          subcategories: string[] | null
+          updated_at: string | null
+          verified: boolean | null
+          website_url: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "restaurants"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      submit_edit_request: {
+        Args: { p_changes: Json; p_restaurant_id: string }
+        Returns: string
+      }
       submit_listing_claim: {
         Args: {
           p_contact_email: string

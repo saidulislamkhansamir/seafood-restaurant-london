@@ -8,6 +8,7 @@ import { ChangeEmailForm } from "@/components/ChangeEmailForm";
 import { ChangePasswordForm } from "@/components/ChangePasswordForm";
 import { MyReviewsList } from "@/components/MyReviewsList";
 import { MyClaimsList } from "@/components/MyClaimsList";
+import { ManageMyRestaurants } from "@/components/ManageMyRestaurants";
 import { subscribeAuth, getAuthSnapshot, getServerAuthSnapshot } from "@/lib/auth-store";
 
 export function AccountContent() {
@@ -74,6 +75,8 @@ export function AccountContent() {
           <MyClaimsList />
         </div>
       </div>
+
+      <ManageMyRestaurants />
     </Container>
   );
 }

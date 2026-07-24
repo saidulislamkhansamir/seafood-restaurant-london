@@ -481,3 +481,256 @@ export async function subscribeToNewsletter(email: string) {
   const { error } = await supabase.from("newsletter_subscribers").insert({ email });
   if (error) throw new Error(error.message);
 }
+
+export async function checkIsBanned(): Promise<boolean> {
+  const { data, error } = await supabase.rpc("is_banned");
+  if (error) return false;
+  return data === true;
+}
+
+// ===== Admin: general restaurant management =====
+
+export type AdminUpdatableRestaurantFields = {
+  name?: string;
+  primary_category?: string;
+  phone?: string;
+  email?: string;
+  website_url?: string;
+  full_address?: string;
+  opening_hours?: string;
+  description?: string;
+  specialities?: string;
+  price_range?: string;
+  booking_link?: string;
+  menu_link?: string;
+  listing_status?: string;
+};
+
+export async function adminUpdateRestaurant(restaurantId: string, fields: AdminUpdatableRestaurantFields) {
+  const { error } = await supabase.rpc("admin_update_restaurant", {
+    p_restaurant_id: restaurantId,
+    p_fields: fields,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export async function adminSetListingStatus(restaurantId: string, status: string) {
+  const { error } = await supabase.rpc("admin_set_listing_status", {
+    p_restaurant_id: restaurantId,
+    p_status: status,
+  });
+  if (error) throw new Error(error.message);
+}
+
+// ===== Admin: "Add Your Restaurant" submissions queue =====
+
+export type AdminSubmission = Tables<"submissions">;
+
+export async function adminListSubmissions(status = "pending"): Promise<AdminSubmission[]> {
+  const { data, error } = await supabase.rpc("admin_list_submissions", { p_status: status });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function adminApproveSubmission(submissionId: string): Promise<string> {
+  const { data, error } = await supabase.rpc("admin_approve_submission", { p_submission_id: submissionId });
+  if (error) throw new Error(error.message);
+  return data as string;
+}
+
+export async function adminRejectSubmission(submissionId: string) {
+  const { error } = await supabase.rpc("admin_reject_submission", { p_submission_id: submissionId });
+  if (error) throw new Error(error.message);
+}
+
+// ===== Admin: listing claims manual-review queue (restaurants with no =====
+// ===== email on file can't auto-verify, so they need a human check) =====
+
+export type AdminClaim = {
+  id: string;
+  restaurant_id: string;
+  restaurant_name: string;
+  restaurant_slug: string;
+  user_id: string;
+  contact_name: string;
+  contact_email: string;
+  message: string | null;
+  status: string;
+  created_at: string;
+};
+
+export async function adminListClaims(status = "pending"): Promise<AdminClaim[]> {
+  const { data, error } = await supabase.rpc("admin_list_claims", { p_status: status });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function adminApproveClaim(claimId: string) {
+  const { error } = await supabase.rpc("admin_approve_claim", { p_claim_id: claimId });
+  if (error) throw new Error(error.message);
+}
+
+export async function adminRejectClaim(claimId: string) {
+  const { error } = await supabase.rpc("admin_reject_claim", { p_claim_id: claimId });
+  if (error) throw new Error(error.message);
+}
+
+// ===== Admin: "Report Wrong Info" queue =====
+
+export type AdminInfoReport = {
+  id: string;
+  restaurant_id: string;
+  restaurant_name: string;
+  restaurant_slug: string;
+  message: string;
+  status: string;
+  created_at: string;
+};
+
+export async function adminListInfoReports(status = "open"): Promise<AdminInfoReport[]> {
+  const { data, error } = await supabase.rpc("admin_list_info_reports", { p_status: status });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function adminResolveInfoReport(reportId: string, dismiss = false) {
+  const { error } = await supabase.rpc("admin_resolve_info_report", {
+    p_report_id: reportId,
+    p_dismiss: dismiss,
+  });
+  if (error) throw new Error(error.message);
+}
+
+// ===== Admin: recent photo submissions (photos go live instantly by =====
+// ===== design, so this is a moderation/removal view, not a queue) =====
+
+export type AdminPhoto = {
+  id: string;
+  restaurant_id: string;
+  restaurant_name: string;
+  restaurant_slug: string;
+  storage_path: string;
+  url: string;
+  is_current_hero: boolean;
+  created_at: string;
+};
+
+export async function adminListRecentPhotos(limit = 30): Promise<AdminPhoto[]> {
+  const { data, error } = await supabase.rpc("admin_list_recent_photos", { p_limit: limit });
+  if (error) throw new Error(error.message);
+  return (data ?? []).map((p) => ({
+    ...p,
+    url: supabase.storage.from("restaurant-photos").getPublicUrl(p.storage_path).data.publicUrl,
+  }));
+}
+
+export async function adminRemovePhoto(restaurantId: string, storagePath: string) {
+  const { error } = await supabase.rpc("admin_remove_photo", {
+    p_restaurant_id: restaurantId,
+    p_storage_path: storagePath,
+  });
+  if (error) throw new Error(error.message);
+}
+
+// ===== Admin: restaurant-owner-submitted edit requests =====
+
+export type AdminEditRequest = {
+  id: string;
+  restaurant_id: string;
+  restaurant_name: string;
+  restaurant_slug: string;
+  user_id: string;
+  user_email: string;
+  changes: Record<string, string>;
+  status: string;
+  admin_note: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+};
+
+export async function adminListEditRequests(status = "pending"): Promise<AdminEditRequest[]> {
+  const { data, error } = await supabase.rpc("admin_list_edit_requests", { p_status: status });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as unknown as AdminEditRequest[];
+}
+
+export async function adminReviewEditRequest(requestId: string, approve: boolean, adminNote?: string) {
+  const { error } = await supabase.rpc("admin_review_edit_request", {
+    p_request_id: requestId,
+    p_approve: approve,
+    p_admin_note: adminNote,
+  });
+  if (error) throw new Error(error.message);
+}
+
+// ===== Admin: users (search, ban, unban) =====
+
+export type AdminUserRow = {
+  id: string;
+  email: string;
+  created_at: string;
+  banned: boolean;
+  ban_reason: string | null;
+};
+
+export async function adminSearchUsers(query: string): Promise<AdminUserRow[]> {
+  const { data, error } = await supabase.rpc("admin_search_users", { p_query: query });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export async function adminBanUser(userId: string, reason?: string) {
+  const { error } = await supabase.rpc("admin_ban_user", { p_user_id: userId, p_reason: reason });
+  if (error) throw new Error(error.message);
+}
+
+export async function adminUnbanUser(userId: string) {
+  const { error } = await supabase.rpc("admin_unban_user", { p_user_id: userId });
+  if (error) throw new Error(error.message);
+}
+
+// ===== Restaurant owner: manage my claimed restaurant(s) =====
+
+export async function getMyClaimedRestaurants(): Promise<Restaurant[]> {
+  const { data, error } = await supabase.rpc("my_claimed_restaurants");
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
+export type OwnerEditableFields = {
+  description?: string;
+  phone?: string;
+  opening_hours?: string;
+  website_url?: string;
+  menu_link?: string;
+  booking_link?: string;
+  specialities?: string;
+};
+
+export async function submitEditRequest(restaurantId: string, changes: OwnerEditableFields) {
+  const { error } = await supabase.rpc("submit_edit_request", {
+    p_restaurant_id: restaurantId,
+    p_changes: changes,
+  });
+  if (error) throw new Error(error.message);
+}
+
+export type MyEditRequest = {
+  id: string;
+  restaurant_id: string;
+  changes: Record<string, string>;
+  status: string;
+  admin_note: string | null;
+  created_at: string;
+  reviewed_at: string | null;
+};
+
+export async function getMyEditRequests(restaurantId: string): Promise<MyEditRequest[]> {
+  const { data, error } = await supabase
+    .from("restaurant_edit_requests")
+    .select("id, restaurant_id, changes, status, admin_note, created_at, reviewed_at")
+    .eq("restaurant_id", restaurantId)
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return (data ?? []) as unknown as MyEditRequest[];
+}
